@@ -1,0 +1,222 @@
+﻿FUNCTION_BLOCK "Festo_ClampingTorque"
+TITLE = Festo_ClampingTorque
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : 'Festo SE & Co. KG'
+FAMILY : Drives
+VERSION : 1.0
+//Functin block to write the clamping torque of a Festo drive.
+//Linear: percentage of the nominal torque
+//Rotative: Absolute value of the torque
+   VAR_INPUT 
+      Execute { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 0;   // 1= Execute the function block
+      LinearRotative : Bool;   // 1= linear axis 0 = rotative axis
+      ClampingTorque : Real := 1.0;   // Torque in Nm for rotative drives
+      PercentForce : USInt := 100;   // Percentage of the nominal torque for linear drives
+      MAP_HardwareId : HW_IO := 0;   // Hardware ID of the ModuleAccessPoint
+   END_VAR
+
+   VAR_OUTPUT 
+      Done { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 1;   // 1= FB finished
+      Busy { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 0;   // 1= FB is busy
+      Error { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 0;   // 1= Error occured while process
+      ErrorId { CFC_Visible := 'true'; CFC_ForTest := 'true'} : DWord := 0;   // Number of the error, see  manual
+      ErrorString : String[50];   // Errorstring for analyzing
+      ActClampingTorque : Real;   // Display the actual written clamping torque
+   END_VAR
+
+   VAR 
+      ValueWriteREAL { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      x { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} : Real;
+      Festo_PNU_RW_Single_Instance : "Festo_PNU_RW_Single";
+      iStep { S7_SetPoint := 'True'} : Int;
+      iPNU : Int;
+      udGearEnumerator : UDInt;
+      udGearDenumerator : UDInt;
+      xReadWrite : Bool;
+      xStartParam : Bool;
+      xBusyParam : Bool;
+      xDoneParam : Bool;
+      xErrorParam : Bool;
+      dwErrorIDParam : DWord;
+      lValueReadLint : LInt;
+      rValueReadReal : Real;
+      rNominalTorque : Real;
+      rGearFactor : Real;
+      rTorqueFactor : Real;
+      trExecuteTrigger {InstructionName := 'R_TRIG'; LibVersion := '1.0'; S7_SetPoint := 'False'} : R_TRIG;
+   END_VAR
+
+
+BEGIN
+	(*############################################################
+	    FESTO SE & Co. KG, Esslingen
+	    Copyright (c) 20203. All rights reserved.    
+	
+	    NAME OF FUNCTION BLOCK:         Festo_ClampingTorque
+	    VERSION NUMBER:                 V1.0
+	    COMPOSER:                       Festo
+	    
+	    -----------------------------------------------------
+	   Date        Name                Activity                                                                              
+	   03.02.2023  bkle                created (V1.0)
+	############################################################*)
+	
+	#trExecuteTrigger(CLK := #Execute);
+	
+	//Check the Inputs-hardwareId
+	IF #MAP_HardwareId = 0 THEN
+	    #Error := true;
+	    #ErrorId := 16#00000010;    //HardwareID = 0
+	    RETURN;
+	END_IF;
+	
+	//Sequence for reading out the nominal torque and gear ratio
+	CASE #iStep OF
+	        
+	    0: //init
+	        #xReadWrite := false;
+	        #xStartParam := false;
+	        #rGearFactor := 0.0;
+	        
+	        IF #trExecuteTrigger.Q THEN
+	            #Busy := true;
+	            #iStep := 10;
+	        END_IF;
+	        
+	    10://read the gear ratio enumerator
+	        #iPNU := 11329; //resulting gear enumerator
+	        #xStartParam := true;
+	        
+	        //Check the Inputs-Percent
+	        IF #PercentForce = 0 AND #LinearRotative THEN
+	            #ErrorId := 1;
+	            #ErrorString := 'TargetTorque is zero';
+	            #iStep := 999;
+	        ELSE
+	            #iStep := 15;
+	        END_IF;
+	        
+	    15: //wait for the parameter answer
+	        IF #xDoneParam AND NOT #xBusyParam THEN
+	            #udGearEnumerator := LINT_TO_UDINT(#lValueReadLint);
+	            #xStartParam := FALSE;
+	            #iStep := 20;
+	        ELSIF #xErrorParam THEN
+	            #ErrorId := #dwErrorIDParam;
+	            #ErrorString := 'Error in Parameter Channel';
+	            #iStep := 999;
+	        END_IF;
+	        
+	    20: //read the gear ration denumerator
+	        #iPNU := 11330; //resulting gear enumerator
+	        #xStartParam := true;
+	        
+	        IF #xBusyParam THEN
+	            #iStep := 25;
+	        END_IF;
+	        
+	    25: //wait for the parameter answer
+	        IF #xDoneParam AND NOT #xBusyParam THEN
+	            #udGearDenumerator := LINT_TO_UDINT(#lValueReadLint);
+	            #xStartParam := FALSE;
+	            #iStep := 30;
+	        ELSIF #xErrorParam THEN
+	            #ErrorId := #dwErrorIDParam;
+	            #ErrorString := 'Error in Parameter Channel';
+	            #iStep := 999;
+	        END_IF;
+	        
+	    30: //read the nominal torque of the drive
+	        #iPNU := 11704; //resulting nominal torque
+	        #xStartParam := true;
+	        
+	        IF #xBusyParam THEN
+	            #iStep := 35;
+	        END_IF;
+	        
+	    35: //wait for the parameter answer
+	        IF #xDoneParam AND NOT #xBusyParam THEN
+	            #rNominalTorque := #rValueReadReal;
+	            #xStartParam := FALSE;
+	            #iStep := 100;
+	        ELSIF #xErrorParam THEN
+	            #ErrorId := #dwErrorIDParam;
+	            #ErrorString := 'Error in Parameter Channel';
+	            #iStep := 999;
+	        END_IF;
+	        
+	    100: //calculation of the gear ratio
+	        #rGearFactor := UDINT_TO_REAL(#udGearEnumerator) / UDINT_TO_REAL(#udGearDenumerator);
+	        #rTorqueFactor := #rGearFactor * #rNominalTorque;
+	        #iStep := 110;
+	        
+	    110: //Calculation of clamping torque
+	        IF #LinearRotative THEN
+	            #ValueWriteREAL := #rTorqueFactor * USINT_TO_REAL(#PercentForce) / 100.0;
+	            #iStep := 120;
+	        ELSE
+	            #ValueWriteREAL := #ClampingTorque;
+	            #iStep := 120;
+	        END_IF;
+	        
+	    120: //write the clamping torque
+	        #xReadWrite := true;
+	        #iPNU := 12168;
+	        #ActClampingTorque := #ValueWriteREAL;
+	        #xStartParam := true;
+	        
+	        IF #xBusyParam THEN
+	            #iStep := 125;
+	        END_IF;
+	        
+	    125: //wait for the parameter answer
+	        IF #xDoneParam AND NOT #xBusyParam THEN
+	            #xStartParam := FALSE;
+	            #iStep := 200;
+	        ELSIF #xErrorParam THEN
+	            #ErrorId := #dwErrorIDParam;
+	            #ErrorString := 'Error in Parameter Channel';
+	            #iStep := 999;
+	        END_IF;
+	        
+	    200: //Done
+	        #Done := true;
+	        #Busy := false;
+	        
+	    999: // general error 
+	        #Error := true;
+	        #Busy := false;
+	        #Done := false;
+	        
+	END_CASE;
+	
+	//Call PNU_FB
+	#Festo_PNU_RW_Single_Instance(Enable := #xStartParam,
+	                              ReadWrite := #xReadWrite,
+	                              ParameterNo := #iPNU,
+	                              Subindex := 0,
+	                              ValueWriteREAL := #ValueWriteREAL,
+	                              ValueWriteLINT := 0,
+	                              ValueWriteBOOL := false,
+	                              AxisNo := 16#01,
+	                              hardwareId := #MAP_HardwareId,
+	                              Busy => #xBusyParam,
+	                              Done => #xDoneParam,
+	                              ValueReadREAL => #rValueReadReal,
+	                              ValueReadLINT => #lValueReadLint,
+	                              Error => #xErrorParam,
+	                              ErrorId => #dwErrorIDParam);
+	
+	IF NOT #Execute THEN
+	    #iStep := 0;
+	    #Busy := false;
+	    #Done := false;
+	    #Error := false;
+	    #ErrorId := 0;
+	    #ActClampingTorque := 0;
+	    #ErrorString := '';
+	END_IF;
+	
+	
+END_FUNCTION_BLOCK
+

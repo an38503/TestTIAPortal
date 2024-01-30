@@ -1,0 +1,1049 @@
+﻿FUNCTION "Festo_Messages_Drives_EN" : Void
+TITLE = Meldungen von CMMT MotorControllern
+{ S7_Optimized_Access := 'TRUE' }
+AUTHOR : LWNR
+VERSION : 1.1
+//Dieser Baustein gibt anhand der Meldungs-ID den Meldetext des Diagnose-
+//ereignisses in Klartext (als STRING) aus.
+//Weiterhin wird die Hauptgruppe, die Untergruppe, die Beschreibung sowie eine Abhilfe der anstehende Diasgnosemeldung in Klartext (als STRING) ausgegeben.
+//Es sind alle Arten von Meldungen (Informationen, Warnungen und Fehler) der Geräte CMMT-AS und CMMT-ST enthalten.
+   VAR_INPUT 
+      ActFault_Drive : Word;   // Actual fault number of the drive
+      ActWarning_Drive : Word;   // Actual warning number of the drive
+   END_VAR
+
+   VAR_OUTPUT 
+      strMessage : String;   // Error or warning message
+   END_VAR
+
+   VAR_TEMP 
+      MessageNo : Word;
+   END_VAR
+
+
+BEGIN
+	(*############################################################
+	    FESTO SE & Co. KG, Esslingen
+	    Copyright (c) 2020. All rights reserved.    
+	
+	    NAME OF FUNCTION BLOCK:         Festo_Messages_Drives_EN
+	    VERSION NUMBER:                 V1.1
+	    COMPOSER:                       Festo
+	    
+	    -----------------------------------------------------
+	   Date        Name                Activity                                                                              
+	   20.02.2020  lwnr                created (V1.0)
+	   09.12.2022  bkle                name changed 
+	                                   Input: ActWarning_Drive added for warnings (V1.1)
+	############################################################*)
+	IF #ActFault_Drive <> 0 THEN
+	    #MessageNo := #ActFault_Drive;
+	ELSIF #ActWarning_Drive <> 0 THEN
+	    #MessageNo := #ActWarning_Drive;
+	END_IF;
+	
+	CASE WORD_TO_INT(#MessageNo) OF
+	    0:
+	        #strMessage := 'no error';
+	        
+	        (***************************************************************************)
+	        (*                       Main group 1 - Current                             *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - Short circuit *)
+	    10:
+	        #strMessage := 'Short circuit motor phases/braking resistor';
+	       
+	    11:
+	        #strMessage := 'Error on over-current monitoring';
+	        
+	        
+	        (* Subgroup 2 - I²T *)
+	    12:
+	        #strMessage := 'I2t monitoring: motor warning limit';
+	        
+	    13:
+	        #strMessage := 'I2t monitoring: motor error limit';
+	        
+	    14:
+	        #strMessage := 'I2t monitoring: output stage warning limit';
+	
+	        
+	    15:
+	        #strMessage := 'I2t monitoring: output stage error limit';
+	        
+	    16:
+	        #strMessage := 'I2t monitoring: output stage in standstill warning limit';
+	        
+	    17:
+	        #strMessage := 'I2t monitoring: output stage in standstill error limit';
+	        
+	    18:
+	        #strMessage := 'I2t monitoring motor: parameterisation invalid';
+	        
+	    258:
+	        #strMessage := 'I2t monitoring: motor warning limit';
+	        
+	    259:
+	        #strMessage := 'I2t monitoring: motor error limit';
+	        
+	        (* Subgroup 3 - braking resistor *)
+	    19:
+	        #strMessage := 'Warning: pulse energy monitoring, braking resistor';
+	        
+	    20:
+	        #strMessage := 'Error: pulse energy monitoring, braking resistor';
+	        
+	    21:
+	        #strMessage := 'Parameterisation of pulse energy monitoring for braking resistor invalid';
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                       Main group 2 - Voltage                          *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - Supply *)
+	    22:
+	        #strMessage := 'Undervoltage in logic supply (PS) 24 V DC';
+	        
+	    23:
+	        #strMessage := 'Overvoltage in logic supply (PS) 24 V DC';
+	        
+	    24:
+	        #strMessage := 'Undervoltage in logic supply 5V internal';
+	        
+	    25:
+	        #strMessage := 'Overvoltage in logic supply 5V internal';
+	        
+	    26:
+	        #strMessage := 'Undervoltage in logic supply 3.3V internal';
+	        
+	    27:
+	        #strMessage := 'Overvoltage in logic supply 3.3V internal';
+	        
+	    28:
+	        #strMessage := 'Undervoltage in logic supply safety section 3.3V internal';
+	        
+	    29:
+	        #strMessage := 'Overvoltage in logic supply safety section 3.3V internal';
+	        
+	        
+	        (* Subgroup 2 - intermediate circuit *)
+	    30:
+	        #strMessage := 'Overvoltage in intermediate circuit';
+	        
+	    31:
+	        #strMessage := 'Undervoltage in intermediate circuit';
+	        
+	    32:
+	        #strMessage := 'Intermediate circuit danger threshold reached';
+	        
+	    33:
+	        #strMessage := 'DC link voltage too low following power failure';
+	        
+	    34:
+	        #strMessage := 'Intermediate circuit precharge time exceeded';
+	        
+	    35:
+	        #strMessage := 'Residual voltage too high following rapid discharge';
+	        
+	    286:
+	        #strMessage := 'The DC relay for loading the DC link does not open';
+	        
+	    287:
+	        #strMessage := 'The DC relay for charging the DC link does not close';
+	        
+	        
+	        (* Subgroup 3 - Mains volatge *)
+	    36:
+	        #strMessage := 'No mains voltage';
+	        
+	    37:
+	        #strMessage := 'System voltage dip detected';
+	        
+	    38:
+	        #strMessage := 'Undervoltage in power supply';
+	        
+	    39:
+	        #strMessage := 'Overvoltage in power supply';
+	        
+	    40:
+	        #strMessage := 'Phase failure in power supply';
+	        
+	    41:
+	        #strMessage := 'Powersupply signal shape NOT as configured';
+	        
+	    251:
+	        #strMessage := 'Deactivation threshold for energy recovery reached';
+	        
+	        
+	        
+	        (* Subgroup 4 - Encoder supply voltage *)
+	    42:
+	        #strMessage := 'Supply voltage for encoder is outside monitoring thresholds';
+	        
+	    43:
+	        #strMessage := 'Encoder supply voltage control failed';
+	        
+	        
+	        (***************************************************************************)
+	        (*                     Main group 3 - TEMPERATURE                          *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - GERAET *)
+	    44:
+	        #strMessage := 'Warning threshold: Insufficient temperature in device';
+	        
+	    45:
+	        #strMessage := 'Insufficient temperature in device';
+	        
+	    46:
+	        #strMessage := 'Warning threshold: Device overtemperature';
+	        
+	    47:
+	        #strMessage := 'Device overtemperature';
+	        
+	        
+	        (* Subgroup 2 - Output stage *)
+	    48:
+	        #strMessage := 'Warning threshold: Insufficient temperature in power section';
+	        
+	    49:
+	        #strMessage := 'Insufficient temperature in output stage';
+	        
+	    50:
+	        #strMessage := 'Warning threshold: Power section overtemperature';
+	        
+	    51:
+	        #strMessage := 'Power section overtemperature';
+	        
+	        
+	        (* Subgroup 3 - MOTOR *)
+	    52:
+	        #strMessage := 'Warning threshold: Insufficient temperature in motor';
+	        
+	    53:
+	        #strMessage := 'Insufficient temperature in motor';
+	        
+	    54:
+	        #strMessage := 'Warning threshold: Motor overtemperature';
+	        
+	    55:
+	        #strMessage := 'Motor overtemperature';
+	        
+	        
+	        (***************************************************************************)
+	        (*                       Main group 5 - Motion                          *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - Homing *)
+	    56:
+	        #strMessage := 'Parameterisation of homing run invalid';
+	        
+	    57:
+	        #strMessage := 'Homing: Timeout';
+	        
+	    58:
+	        #strMessage := 'Homing: Search path exceeded';
+	        
+	        
+	        (* Subgroup 2 - Movement calculation *)
+	    59:
+	        #strMessage := 'Task invalid';
+	        
+	    60:
+	        #strMessage := 'Unknown motion task pending';
+	        
+	    61:
+	        #strMessage := 'Task could not be executed as the drive control is missing';
+	        
+	    62:
+	        #strMessage := 'Task could not be executed as a safety function is requested';
+	        
+	    63:
+	        #strMessage := 'Calculation of brake travel failed';
+	        
+	    64:
+	        #strMessage := 'Task could not be executed as no DC link voltage is present';
+	        
+	    65:
+	        #strMessage := 'Motion task rejected in current status';
+	        
+	    66:
+	        #strMessage := 'Task could not be executed as the encoder is not ready';
+	        
+	    67:
+	        #strMessage := 'Task could not be executed as the drive is not referenced';
+	        
+	    68:
+	        #strMessage := 'Task could not be executed as a reinitialization is required due to a parameter change';
+	        
+	    69:
+	        #strMessage := 'Task could not be executed as a restart is required due to a parameter change';
+	        
+	    71:
+	        #strMessage := 'An error occurred in the trajectory generator when calculating a movement profile';
+	        
+	    72:
+	        #strMessage := 'The position specified for the trajectory generator is invalid';
+	        
+	    73:
+	        #strMessage := 'The speed specified for the trajectory generator is invalid';
+	        
+	    74:
+	        #strMessage := 'The acceleration specified for the trajectory generator is invalid';
+	        
+	    75:
+	        #strMessage := 'The delay specified for the trajectory generator is invalid';
+	        
+	    76:
+	        #strMessage := 'The jerk specified for the trajectory generator is invalid';
+	        
+	    77:
+	        #strMessage := 'An error occurred in the trajectory generator when calculating a movement profile';
+	        
+	    78:
+	        #strMessage := 'Stop ramp: Timeout';
+	        
+	    79:
+	        #strMessage := 'The torque increase is invalid';
+	        
+	    80:
+	        #strMessage := 'Simultaneous negative/positive directional lock';
+	        
+	    245:
+	        #strMessage := 'Received PDO outside tolerance window';
+	        
+	    278:
+	        #strMessage := 'Order could not be executed because a directional lock is active';
+	        
+	    279:
+	        #strMessage := 'Fixed stop not reached';
+	        
+	    280:
+	        #strMessage := 'Monitoring window exit fixed stop';
+	        
+	    364:
+	        #strMessage := 'The preset profile velocity is 0';
+	        
+	        (***************************************************************************)
+	        (*             Main group 6 - KONFIGURATION                *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 0 - no categorie *)
+	    70:
+	        #strMessage := 'Record table parameter is invalid';
+	        
+	    81:
+	        #strMessage := 'The operating mode of the regulator (position, speed, force, stop) does not match the parameterisation';
+	        
+	    82:
+	        #strMessage := 'The parameterisation of the notch filter frequency is invalid';
+	        
+	    83:
+	        #strMessage := 'Record table incorrect';
+	        
+	    84:
+	        #strMessage := 'Parameterisation of switching frequency invalid';
+	        
+	    85:
+	        #strMessage := 'The configuration of the digital inputs or outputs is invalid';
+	        
+	    248:
+	        #strMessage := 'The parameterized motor type (servo, stepper, ...) is not supported';
+	        
+	    252:
+	        #strMessage := 'Start and end voltage for reactive current braking incompatible';
+	        
+	    313:
+	        #strMessage := 'Selection data trigger in function Variable signalling function invalid';
+	        
+	        
+	        (* Subgroup 2 - Boundary value *)
+	    86:
+	        #strMessage := 'Setpoint torque and speed limit do not match';
+	        
+	    87:
+	        #strMessage := 'Speed control limitation invalid';
+	        
+	    88:
+	        #strMessage := 'Torque control limitation invalid';
+	        
+	    89:
+	        #strMessage := 'Current control limitation invalid';
+	        
+	    90:
+	        #strMessage := 'Maximum peak current control limitation invalid';
+	        
+	    91:
+	        #strMessage := 'Parameterisation of nominal current/maximum peak current of motor invalid';
+	        
+	    273:
+	        #strMessage := 'Change of control mode not permitted';
+	        
+	    274:
+	        #strMessage := 'Movement order not permitted in controlled operation';
+	        
+	    275:
+	        #strMessage := 'Change to close-loop operation not permitted';
+	        
+	        
+	        (* Subgroup 5 - Parameter set *)
+	    97:
+	        #strMessage := 'Parameter set not found';
+	        
+	    98:
+	        #strMessage := 'Parameter set invalid';
+	        
+	    99:
+	        #strMessage := 'Parameter set incompatible';
+	        
+	    100:
+	        #strMessage := 'Parameter not found';
+	        
+	    101:
+	        #strMessage := 'Parameter not writable';
+	        
+	    102:
+	        #strMessage := 'Transmission error in parameter set';
+	        
+	    103:
+	        #strMessage := 'Parameter set: store failed';
+	        
+	    104:
+	        #strMessage := 'Parameter set: delete failed';
+	        
+	    105:
+	        #strMessage := 'Factory parameter not found';
+	        
+	    106:
+	        #strMessage := 'Factory parameter set invalid';
+	        
+	    107:
+	        #strMessage := 'Factory parameter set not found';
+	        
+	    108:
+	        #strMessage := 'Factory parameter set incompatible';
+	        
+	    290:
+	        #strMessage := 'Parameter set version older';
+	        
+	    291:
+	        #strMessage := 'Parameter set version newer';
+	        
+	        
+	        (***************************************************************************)
+	        (*                        Main group 7 - Monitoring                      *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - Limits *)
+	    109:
+	        #strMessage := 'Negative software end position';
+	        
+	    110:
+	        #strMessage := 'Positive software end position';
+	        
+	    111:
+	        #strMessage := 'Limitation negative direction';
+	        
+	    112:
+	        #strMessage := 'Limitation positive direction';
+	        
+	    113:
+	        #strMessage := 'Parameterisation of software end positions';
+	        
+	    114:
+	        #strMessage := 'Negative hardware limit switch reached';
+	        
+	    115:
+	        #strMessage := 'Positive hardware limit switch reached';
+	        
+	    116:
+	        #strMessage := 'Limitation by negative hardware limit switch';
+	        
+	    117:
+	        #strMessage := 'Limitation by positive hardware limit switch';
+	        
+	    118:
+	        #strMessage := 'Error: both hardware limit switches occupied';
+	        
+	    119:
+	        #strMessage := 'Negative stroke limit reached';
+	        
+	    120:
+	        #strMessage := 'Positive stroke limit reached';
+	        
+	        
+	        (* Subgroup 2 - Motion monitoring *)
+	    121:
+	        #strMessage := 'Target position reached';
+	        
+	    122:
+	        #strMessage := 'Target speed reached';
+	        
+	    123:
+	        #strMessage := 'Target torque reached';
+	        
+	    124:
+	        #strMessage := 'Standstill reached';
+	        
+	    125:
+	        #strMessage := 'Standstill reached and within standstill window';
+	        
+	    126:
+	        #strMessage := 'Position error: following error';
+	        
+	    127:
+	        #strMessage := 'velocity: following error';
+	        
+	    128:
+	        #strMessage := 'velocity monitoring reports velocity too high';
+	        
+	    129:
+	        #strMessage := 'Drive has left the target range';
+	        
+	    130:
+	        #strMessage := 'Reverse feed monitoring reports error';
+	        
+	    131:
+	        #strMessage := 'Residual distance too low';
+	        
+	    132:
+	        #strMessage := 'Trajectory completed setpoint value reached';
+	        
+	    133:
+	        #strMessage := 'Position difference encoder 1 to encoder 2 too large';
+	        
+	        
+	        (* Subgroup 3 - boundary values *)
+	    134:
+	        #strMessage := 'Voltage limiting active';
+	        
+	    135:
+	        #strMessage := 'A limit for the speed or current is active';
+	        
+	        
+	        (* Subgroup 4 - Zero angle *)
+	    136:
+	        #strMessage := 'Zero-angle location failed';
+	        
+	    137:
+	        #strMessage := 'Commutation finding error';
+	        
+	        
+	        (* Subgroup 5 - analog input *)
+	    138:
+	        #strMessage := 'Analogue setpoint specification limit exceeded';
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                      Main group 8 - Communication                       *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 0 - no categorie *)
+	    139:
+	        #strMessage := 'Fieldbus not supported';
+	        
+	    140:
+	        #strMessage := 'Failure of fieldbus synchronisation signal';
+	        
+	    243:
+	        #strMessage := 'Invalid cycle time';
+	        
+	        
+	        (* Subgroup 3 - PROFINET *)
+	    141:
+	        #strMessage := 'Invalid process data';
+	        
+	    373:
+	        #strMessage := 'Failure of communication processor synchronisation';
+	        
+	        
+	        (* Subgroup 9 - PROFIDRIVE *)
+	    144:
+	        #strMessage := 'Application class not supported';
+	        
+	    145:
+	        #strMessage := 'Telegram not supported';
+	        
+	    288:
+	        #strMessage := 'ProfiDrive test fault 1';
+	        
+	    289:
+	        #strMessage := 'ProfiDrive test fault 2';
+	        
+	    294:
+	        #strMessage := 'PLC Control Bit is not set';
+	        
+	    299:
+	        #strMessage := 'clock cycle synchronous operation sign-of-life failure';
+	        
+	    382:
+	        #strMessage := 'Invalid configuration Extended process data';
+	        
+	        
+	        (* Subgroup 12 - others *)
+	    250:
+	        #strMessage := 'Invalid operating mode';
+	        
+	    272:
+	        #strMessage := 'Resolution position factor group invalid';
+	        
+	        
+	        (***************************************************************************)
+	        (*                     Main group 9 - Safety                               *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 0 - no categorie *)
+	    146:
+	        #strMessage := 'Safety function requested';
+	        
+	    147:
+	        #strMessage := 'Plausibility check of safety feedback signals';
+	        
+	        
+	        (* Subgroup 1 - STO *)
+	    148:
+	        #strMessage := 'STO: Discrepancy time exceeded';
+	        
+	    149:
+	        #strMessage := 'Plausibility check #STO-A/B';
+	        
+	    150:
+	        #strMessage := 'Sequence monitoring #STO-A/B';
+	        
+	        
+	        (* Subgroup 2 - SBC *)
+	    151:
+	        #strMessage := 'Plausibility check #SBC-A/B';
+	        
+	    152:
+	        #strMessage := 'SBC: Discrepancy time exceeded';
+	        
+	        
+	        (***************************************************************************)
+	        (*                     Main group 10 - Internal hardware                   *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - Module error *)
+	    153:
+	        #strMessage := 'RTE module cannot be reached';
+	        
+	    154:
+	        #strMessage := 'Internalisation of RTE module failed';
+	        
+	    155:
+	        #strMessage := 'Error: fan faulty';
+	        
+	    156:
+	        #strMessage := 'Common error power output stage';
+	        
+	    157:
+	        #strMessage := 'FPGA does not start up';
+	        
+	    158:
+	        #strMessage := 'FPGA version invalid';
+	        
+	    199:
+	        #strMessage := 'Synchronisation with FPGA failed';
+	        
+	    249:
+	        #strMessage := 'Error RTE module watchdog monitoring';
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                         Main group 11 - SOFTWARE                       *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - EXCEPTION *)
+	        
+	    159:
+	        #strMessage := 'Data directory memory full';
+	        
+	    160:
+	        #strMessage := 'Data directory indexed twice';
+	        
+	    161:
+	        #strMessage := 'Overflow diagnostic register';
+	        
+	    162:
+	        #strMessage := 'Overflow diagnostic register buffer';
+	        
+	    163:
+	        #strMessage := 'Error user unit conversion';
+	        
+	    244:
+	        #strMessage := 'Undervoltage RTE module';
+	        
+	        
+	        (* Subgroup 2 - TASK *)
+	    164:
+	        #strMessage := 'Process runtime exceeded';
+	        
+	    165:
+	        #strMessage := 'Timeout process level 0';
+	        
+	    166:
+	        #strMessage := 'Timeout process level 1';
+	        
+	    167:
+	        #strMessage := 'Timeout process level 2';
+	        
+	    168:
+	        #strMessage := 'Timeout process level 3';
+	        
+	    169:
+	        #strMessage := 'Timeout process level 4';
+	        
+	    170:
+	        #strMessage := 'Timeout process level 5';
+	        
+	    171:
+	        #strMessage := 'Timeout process level 6';
+	        
+	    172:
+	        #strMessage := 'Timeout process level 7';
+	        
+	        
+	        (* Subgroup 3 - File system *)
+	    173:
+	        #strMessage := 'File system faulty';
+	        
+	    174:
+	        #strMessage := 'File: user file (backup) invalid';
+	        
+	    175:
+	        #strMessage := 'Creation of user file (backup) not possible';
+	        
+	    176:
+	        #strMessage := 'CRC error in user file';
+	        
+	    177:
+	        #strMessage := 'File: user file invalid';
+	        
+	    178:
+	        #strMessage := 'New user file has been created';
+	        
+	    179:
+	        #strMessage := 'Writing to user file not possible';
+	        
+	    180:
+	        #strMessage := 'Unknown user file error';
+	        
+	        
+	        (* Subgroup 4 - FIRMWAREUPDATE *)
+	    181:
+	        #strMessage := 'Writing to firmware failed';
+	        
+	    182:
+	        #strMessage := 'Reading from firmware failed';
+	        
+	    183:
+	        #strMessage := 'Firmware invalid';
+	        
+	    184:
+	        #strMessage := 'Firmware incompatible';
+	        
+	    185:
+	        #strMessage := 'Firmware save location invalid';
+	        
+	    186:
+	        #strMessage := 'Firmware save location empty';
+	        
+	    187:
+	        #strMessage := 'Firmware update not allowed';
+	        
+	    188:
+	        #strMessage := 'Firmware package in use';
+	        
+	    189:
+	        #strMessage := 'System error during firmware update';
+	        
+	    190:
+	        #strMessage := 'Firmware update failed';
+	        
+	        
+	        (* Subgroup 5 - Device configuration *)
+	    191:
+	        #strMessage := 'Calibration data incorrect: Safety';
+	        
+	    192:
+	        #strMessage := 'Device data incorrect';
+	        
+	    193:
+	        #strMessage := 'Device data incorrect: control section';
+	        
+	    194:
+	        #strMessage := 'Device data incorrect: communication section';
+	        
+	    195:
+	        #strMessage := 'Device data incorrect: Safety';
+	        
+	    196:
+	        #strMessage := 'Calibration data incorrect: control section';
+	        
+	    197:
+	        #strMessage := 'Calibration data incorrect: power section';
+	        
+	    198:
+	        #strMessage := 'Device data incorrect: power section';
+	        
+	    200:
+	        #strMessage := 'Current sensor calibration invalid';
+	        
+	    201:
+	        #strMessage := 'Device not configured';
+	        
+	    202:
+	        #strMessage := 'Device data: store failed';
+	        
+	        
+	        (* Subgroup 6 - LIBRTE *)
+	    203:
+	        #strMessage := 'Answer to a read request missing in LibRTE';
+	        
+	    285:
+	        #strMessage := 'Error communication module mailbox';
+	        
+	    300:
+	        #strMessage := 'COM module error';
+	        
+	        
+	        (* Subgroup 7 - WARMSTART *)
+	    204:
+	        #strMessage := 'Initialization failed';
+	        
+	    205:
+	        #strMessage := 'Task ignored as reinitialization not possible';
+	        
+	    271:
+	        #strMessage := 'Reinitialization failed';
+	        
+	        
+	        (* Subgroup 8 - version  management *)
+	    206:
+	        #strMessage := 'Hardware does not correspond to expected revision status';
+	        
+	    207:
+	        #strMessage := 'Hardware does not correspond to expected compatibility state';
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                         Main group 12 - maintenance                        *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - Mileage *)
+	    208:
+	        #strMessage := 'Maximum value for the mileage is reached';
+	        
+	    209:
+	        #strMessage := 'Mileage danger threshold reached';
+	        
+	    210:
+	        #strMessage := 'Mileage error threshold reached';
+	        
+	    211:
+	        #strMessage := 'Maximum load change value reached';
+	        
+	    212:
+	        #strMessage := 'Load change danger threshold reached';
+	        
+	    213:
+	        #strMessage := 'Load change error threshold reached';
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                      Main group 13 - Others                     *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - diagnosis *)
+	    214:
+	        #strMessage := 'Message acknowledgment';
+	        
+	    215:
+	        #strMessage := 'Diagnostics log file has invalid format';
+	        
+	    216:
+	        #strMessage := 'Loss of messages from diagnostics log';
+	        
+	        
+	        (* Subgroup 2 - AUTOTUNING *)
+	    217:
+	        #strMessage := 'Autotuning aborted';
+	        
+	    218:
+	        #strMessage := 'Autotuning travel insufficient';
+	        
+	    219:
+	        #strMessage := 'Autotuning controller parameters invalid';
+	        
+	    220:
+	        #strMessage := 'Transmission of autotuning measured values failed';
+	        
+	        
+	        
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                     Main group 16 - External device                     *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - CDSB *)
+	    221:
+	        #strMessage := 'CDSB display file faulty';
+	        
+	    222:
+	        #strMessage := 'JSON display description for CDSB too large';
+	        
+	    223:
+	        #strMessage := 'SPI communication too slow';
+	        
+	        
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                   Main group 17 - Safety (data)                         *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 1 - User login *)
+	    224..225:
+	        #strMessage := 'Login completed';
+	        
+	    226:
+	        #strMessage := 'Login error';
+	        
+	        
+	        
+	        
+	        
+	        (***************************************************************************)
+	        (*                        Main group 18 - Encoder                          *)
+	        (***************************************************************************)
+	        
+	        (* Subgroup 0 - no cetegorie *)
+	    92:
+	        #strMessage := 'Motor change detected, commutation angle invalid';
+	        
+	    93:
+	        #strMessage := 'Motor change detected, zero point offset invalid';
+	        
+	    94:
+	        #strMessage := 'Commutation angle in encoder invalid';
+	        
+	    95:
+	        #strMessage := 'Encoder type plate invalid';
+	        
+	    96:
+	        #strMessage := 'Encoder type plate (user-defined) invalid';
+	        
+	    227:
+	        #strMessage := 'Encoder identification reports incorrect encoder type';
+	        
+	    318:
+	        #strMessage := 'State transition error';
+	        
+	        
+	        (* Subgroup 1 - ENDAT*)
+	    228:
+	        #strMessage := 'Common error EnDat 2.1';
+	        
+	    229:
+	        #strMessage := 'Common error EnDat 2.2';
+	        
+	        
+	        (* Subgroup 2 - HYPERFACE*)
+	    230:
+	        #strMessage := 'Vector length invalid';
+	        
+	    231:
+	        #strMessage := 'Quadrant invalid';
+	        
+	    232:
+	        #strMessage := 'Hiperface communication timeout';
+	        
+	    233:
+	        #strMessage := 'Error in CRC protocol Hiperface';
+	        
+	    234:
+	        #strMessage := 'Common error Hiperface';
+	        
+	    276:
+	        #strMessage := 'Quadrant unstable';
+	        
+	        
+	        (* Subgroup 3 - QUADRATURE (incremental encoder)*)
+	    235:
+	        #strMessage := 'Incremental encoder analysis invalid';
+	        
+	    301:
+	        #strMessage := 'Increments between Z-pulses invalid';
+	        
+	        
+	        (* Subgroup 4 - NIKON A*)
+	    236:
+	        #strMessage := 'Protocol error Nikon-A encoder';
+	        
+	    237:
+	        #strMessage := 'Timeout Nikon-A encoder';
+	        
+	    238:
+	        #strMessage := 'CRC error Nikon-A encoder';
+	        
+	        
+	        (* Subgroup 5 - BISS C*)
+	    239:
+	        #strMessage := 'BISSC encoder analysis invalid';
+	        
+	        
+	        (* Subgroup 6 - SIN/COS*)
+	    240:
+	        #strMessage := 'Vector length invalid';
+	        
+	    241:
+	        #strMessage := 'Quadrant invalid';
+	        
+	    242:
+	        #strMessage := 'Timeout Geberinitialisierung';
+	        
+	    277:
+	        #strMessage := 'Error SIN/COS-encoder';
+	        
+	        
+	        (* Subgroup 7 - encoder systems *)
+	    365:
+	        #strMessage := 'Invalid request Gn_STW1.4...7';
+	        
+	    366:
+	        #strMessage := 'Function not supported Gn_STW1';
+	        
+	    367:
+	        #strMessage := 'Axis parking not possible';
+	        
+	    368:
+	        #strMessage := 'Error reference marks search';
+	        
+	    369:
+	        #strMessage := 'Error Read Position Reference mark';
+	        
+	    370:
+	        #strMessage := 'Error measuring on the fly';
+	        
+	    371:
+	        #strMessage := 'Error Read Position Measure on the fly';
+	        
+	    372:
+	        #strMessage := 'Error Transfer absolute position to Gn_XIST2';
+	        
+	    ELSE  // Statement section ELSE
+	        #strMessage := 'unknown';
+	END_CASE;
+	
+END_FUNCTION
+

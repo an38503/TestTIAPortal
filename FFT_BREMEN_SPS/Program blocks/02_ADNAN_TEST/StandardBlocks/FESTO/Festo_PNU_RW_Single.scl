@@ -1,0 +1,714 @@
+﻿FUNCTION_BLOCK "Festo_PNU_RW_Single"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT 
+      Enable { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 0;   // 1 = Start the request
+      ReadWrite { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 0;   // 1 = Write, 0 = read
+      ParameterNo { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Int := 0;   // PNU number
+      Subindex { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Int := 0;   //  Index
+      ValueWriteREAL { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Real := 0.0;   // Write value type REAL
+      ValueWriteLINT : LInt := 0;   // Write value type LINT
+      ValueWriteBOOL : Bool;   // Write value type BOOL
+      AxisNo { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Byte := 16#01;   // Axis number
+      hardwareId : HW_IO := 0;   // Hardware identifier of the ModuleAccessPoint
+   END_VAR
+
+   VAR_OUTPUT 
+      Busy { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 0;   //  1 = function block is busy
+      Done { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 1;   //  1 = request is finished
+      ValueReadREAL { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Real := 0.0;   // Read value type REAL
+      ValueReadLINT : LInt := 0;   // Read value type LINT
+      ValueReadBOOL : Bool;   // Read value type BOOL
+      Error { CFC_Visible := 'true'; CFC_ForTest := 'true'} : Bool := 0;   //  1 = Error occured
+      ErrorId { CFC_Visible := 'true'; CFC_ForTest := 'true'} : DWord := 0;   // Error number (see manual)
+   END_VAR
+
+   VAR 
+      st_DataType : Byte := 16#00;   // Format of the parameter
+      st_ReqRef : USInt := 16#01;   // Request Referenz ID (1...FF)
+      st_step : Int;
+      R_TRIG_Execute {InstructionName := 'R_TRIG'; LibVersion := '1.0'} : R_TRIG;
+      st_RW_Param : Struct   // Read or write a parameter structure
+         ReqHeader : Struct   //  Request header
+            ReqRef : Byte := 16#00;   //  Request reference
+            ReqId : Byte := 16#01;   //  Request ID 0x1=Read
+            AxisNo : Byte := 16#00;   //  Axis (DO-ID number 1 - 254)
+            NoParam : Byte := 16#00;   //  No. of parameters (1=single access)
+         END_STRUCT;
+         ParaAdress : Struct   //  Parameter address
+            Attribute : Byte := 16#10;   //  Attribute of parameters (0x10=Value, 0x20=Description, 0x30=Text)
+            ElemNo : Byte := 16#01;   //  No. of elements (1=single access)
+            ParaNo : Int := 0;   //  Number of parameter (Number 1..65535)
+            Index : Int := 0;   //  Subindex (Number 1..65535)
+         END_STRUCT;
+      END_STRUCT;
+      st_WR_Param : Struct   // Structure for writing parameter
+         ReqHeader : Struct   //  Request header
+            ReqRef : Byte := 16#00;   //  Request reference
+            ReqId : Byte := 16#00;   //  Request ID 0x2=write
+            AxisNo : Byte := 16#00;   //  Axis (DO-ID number 1 - 254)
+            ParaNo : Byte := 16#00;   //  No. of parameters (1=single access)
+         END_STRUCT;
+         Data : Struct
+            Attribute : Byte;
+            NoElements : Byte;
+            PNU : Int;
+            Subindex : Int;
+            Value : Array[0..9] of Byte;
+         END_STRUCT;
+      END_STRUCT;
+      st_RD_Param : Struct   // Structure for reading parameter
+         RespHeader : Struct   //  Response header
+            ReqRefMir : Byte := 16#00;   //  Request reference mirrored
+            RespId : Byte := 16#00;   //  Response ID
+            AxisNo : Byte := 16#00;   //  Axis (DO-ID number 1 - 254) mirrored
+            ParaNo : Byte := 16#00;   //  No. of parameters (1=single access)
+         END_STRUCT;
+         Data : Struct
+            Format : Byte;
+            NoValues : Byte;
+            Values : Array[0..7] of Byte;
+         END_STRUCT;
+      END_STRUCT;
+      WRREC_Profidrive {InstructionName := 'WRREC'; LibVersion := '1.1'} : WRREC;
+      RDREC_Profidrive {InstructionName := 'RDREC'; LibVersion := '1.0'; S7_SetPoint := 'False'} : RDREC;
+      st_lenght { S7_SetPoint := 'True'} : UInt;
+      st_StatusWR : DWord;   // FB status or error information
+      st_StatusRW : DWord;   // FB status or error information
+      st_StatusRead : DWord;   // FB status or error information
+      st_LenghtRead : UInt;   // Lenght of the data telegramm
+   END_VAR
+   VAR DB_SPECIFIC
+      st_Real_aux : Real;
+      st_myRealAT { ExternalAccessible := 'False'; ExternalVisible := 'False'; ExternalWritable := 'False'} AT st_Real_aux : Array[0..3] of Byte;
+   END_VAR
+   VAR 
+      st_ErrorCounter : UInt;
+      st_wordhlp : Word;
+      IEC_Timer {InstructionName := 'TON_TIME'; LibVersion := '1.0'} : TON_TIME;
+      st_StartTimer { S7_SetPoint := 'True'} : Bool;
+      st_StartRW : Bool := TRUE;
+   END_VAR
+
+   VAR_TEMP 
+      tmpWord : Word;   // Temp Word for calculation
+      tmpDWord : DWord;   // Temp DWord for calculation
+      tmpSINT : SInt;   // Temp SINT for calculation
+      tmpINT : Int;   // Temp Int for calculation
+      tmpDINT : DInt;   // Temp DINT for calculation
+      tmpLINT : LInt;   // Temp LINT for calculation
+      i : Int;   // Index variable
+   END_VAR
+
+   VAR CONSTANT 
+      LenHeader : UInt := 4;   // Lenght of the Header
+      LenRequest : UInt := 6;   // Lenght of the Requst telegramm
+      LenWrite : UInt := 16;   // Lenght of the Write telegramm
+      LenRead : UInt := 10;   // Lenght of the Read telegramm
+      PD_Error : DWord := 16#4000_0000;
+      MaxRetryCounter : UInt := 150;
+   END_VAR
+
+
+BEGIN
+	(*############################################################
+	    FESTO SE & Co. KG, Esslingen
+	    Copyright (c) 2020. All rights reserved.    
+	
+	    NAME OF FUNCTION BLOCK:         Festo_PNU_RW_Single
+	    VERSION NUMBER:                 V1.0
+	    COMPOSER:                       Festo
+	    
+	    -----------------------------------------------------
+	   Date        Name                Activity                                                                              
+	   16.02.2021  bkle                created (V1.0)
+	############################################################*)
+	#R_TRIG_Execute(CLK := #Enable);
+	
+	//Check the Inputs
+	IF #hardwareId = 0 THEN
+	    #Error := true;
+	    #ErrorId := 16#00001010;    //HardwareID = 0
+	    RETURN;
+	END_IF;
+	
+	//Timer
+	#IEC_Timer(IN := #st_StartTimer,
+	           PT := t#100ms);
+	IF #IEC_Timer.Q THEN
+	    #st_StartRW := true;
+	    #st_StartTimer := false;
+	END_IF;
+	
+	
+	CASE #st_step OF
+	        
+	    0: //Wait for start trigger
+	        IF #R_TRIG_Execute.Q THEN
+	            #st_StartRW := TRUE;
+	            #st_step := 10;
+	            #Busy := true;
+	        END_IF;
+	        
+	    10:
+	        (* ------------------ HEADER --------------------*)
+	        //Fill the Axis number
+	        #st_RW_Param.ReqHeader.AxisNo := #AxisNo;
+	        
+	        // Single parameter access
+	        #st_RW_Param.ReqHeader.NoParam := 1;
+	        
+	        // Requst ID = 1 (Request Parameter)
+	        #st_RW_Param.ReqHeader.ReqId := 1;
+	        
+	        //Request reference starts with 1 and will count up 
+	        #st_RW_Param.ReqHeader.ReqRef := #st_ReqRef;
+	        
+	        (* ------------------ Parameter address ------------*)
+	        //Attribute
+	        #st_RW_Param.ParaAdress.Attribute := 16#10;
+	        
+	        //ElemNo.
+	        #st_RW_Param.ParaAdress.ElemNo := 1;
+	        
+	        // Assign PNU
+	        #st_RW_Param.ParaAdress.ParaNo := #ParameterNo;
+	        
+	        // Assign Subindex
+	        #st_RW_Param.ParaAdress.Index := #Subindex;
+	        
+	        // Lenght of the telegramm to be send
+	        #st_lenght := #LenHeader + #LenRequest;
+	        
+	        #WRREC_Profidrive(REQ := #st_StartRW,
+	                          ID := #hardwareId,
+	                          INDEX := 16#b02e,
+	                          LEN := #st_lenght,
+	                          STATUS => #st_StatusRW,
+	                          RECORD := #st_RW_Param);
+	        
+	        IF #WRREC_Profidrive.DONE THEN
+	            #st_ErrorCounter := 0;
+	            //delete old response values
+	            #st_RD_Param.RespHeader.ReqRefMir := 0;
+	            #st_RD_Param.RespHeader.RespId := 0;
+	            #st_RD_Param.RespHeader.AxisNo := 0;
+	            #st_RD_Param.RespHeader.ParaNo := 0;
+	            #st_RD_Param.Data.Format := 0;
+	            #st_RD_Param.Data.NoValues := 0;
+	            FOR #i := 0 TO 7 DO
+	                #st_RD_Param.Data.Values[#i] := 0;
+	            END_FOR;
+	            
+	            IF NOT #ReadWrite THEN
+	                //Read parameter
+	                #st_step := 20;
+	            ELSE
+	                //Write parameter
+	                #st_step := 50;
+	            END_IF;
+	        ELSIF #WRREC_Profidrive.ERROR THEN
+	            #tmpWord := DWORD_TO_WORD(SHR(IN := #st_StatusRW, N := 8));
+	            #st_wordhlp := #tmpWord;
+	            //try it again
+	            IF ((#tmpWord = 16#80A7) OR (#tmpWord = 16#80B5) OR (#tmpWord = 16#80C0) OR (#tmpWord = 16#80C1) OR (#tmpWord = 16#80C2)
+	                OR (#tmpWord = 16#80C3) OR (#tmpWord = 16#80C4)) AND (#st_ErrorCounter < #MaxRetryCounter) THEN
+	                #st_ErrorCounter := #st_ErrorCounter + 1;
+	                #st_StartRW := false;
+	                #st_StartTimer := TRUE;
+	            ELSE
+	                #st_step := 70;
+	            END_IF;
+	            
+	        END_IF;
+	        
+	    20:  //Read Parameter
+	        // Lenght of the telegramm for reading
+	        #st_lenght := #LenHeader + #LenRead;
+	        
+	        #RDREC_Profidrive(REQ := #st_StartRW,
+	                          ID := #hardwareId,
+	                          INDEX := 16#b02e,
+	                          MLEN := #st_lenght,
+	                          STATUS => #st_StatusRead,
+	                          LEN => #st_LenghtRead,
+	                          RECORD := #st_RD_Param);
+	        
+	        IF #RDREC_Profidrive.VALID AND NOT #RDREC_Profidrive.BUSY THEN
+	            #st_ErrorCounter := 0;
+	            #st_step := 30;
+	        ELSIF #RDREC_Profidrive.ERROR THEN
+	            #tmpWord := DWORD_TO_WORD(SHR(IN := #st_StatusRead, N := 8));
+	            #st_wordhlp := #tmpWord;
+	            //try it again
+	            IF ((#tmpWord = 16#80A7) OR (#tmpWord = 16#80B5) OR (#tmpWord = 16#80C0) OR (#tmpWord = 16#80C1) OR (#tmpWord = 16#80C2)
+	                OR (#tmpWord = 16#80C3) OR (#tmpWord = 16#80C4)) AND (#st_ErrorCounter < #MaxRetryCounter) THEN
+	                #st_ErrorCounter := #st_ErrorCounter + 1;
+	                #st_StartRW := false;
+	                #st_StartTimer := TRUE;
+	            ELSE
+	                #st_step := 80;
+	            END_IF;
+	            
+	        END_IF;
+	        
+	    30:  //Reading finished successfull
+	        
+	        CASE BYTE_TO_INT(#st_RD_Param.Data.Format) OF
+	            0:  //reserved
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                #ErrorId := 16#1001;    //reserved DataType
+	                // #Error
+	                #st_step := 200;
+	                
+	            1:  // BOOLEAN 
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := BYTE_TO_BOOL(#st_RD_Param.Data.Values[0]);
+	                
+	                // no error
+	                #st_step := 100;
+	                
+	            2:  //SINT8
+	                #tmpSINT := BYTE_TO_SINT(#st_RD_Param.Data.Values[0]);
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := (SINT_TO_LINT(#tmpSINT));
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no error
+	                #st_step := 100;
+	                
+	            3:  //SINT16
+	                #tmpINT.%B0 := #st_RD_Param.Data.Values[1];
+	                #tmpINT.%B1 := #st_RD_Param.Data.Values[0];
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := INT_TO_LINT(#tmpINT);
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no #Error
+	                #st_step := 100;
+	                
+	            4:  //SINT32
+	                #tmpDINT.%B0 := #st_RD_Param.Data.Values[3];
+	                #tmpDINT.%B1 := #st_RD_Param.Data.Values[2];
+	                #tmpDINT.%B2 := #st_RD_Param.Data.Values[1];
+	                #tmpDINT.%B3 := #st_RD_Param.Data.Values[0];
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := DINT_TO_LINT(#tmpDINT);
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no #Error
+	                #st_step := 100;
+	                
+	            5, 65: //USINT8(5) or BYTE(65)
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := (BYTE_TO_LINT(#st_RD_Param.Data.Values[0]));
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no error
+	                #st_step := 100;
+	                
+	            6, 66: //UINT16(6) or WORD(66)
+	                #tmpWord.%B0 := #st_RD_Param.Data.Values[1];
+	                #tmpWord.%B1 := #st_RD_Param.Data.Values[0];
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := WORD_TO_LINT(#tmpWord);
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no #Error
+	                #st_step := 100;
+	                
+	            7, 67: //UDINT32(7) or DWORD(67)
+	                #tmpDWord.%B0 := #st_RD_Param.Data.Values[3];
+	                #tmpDWord.%B1 := #st_RD_Param.Data.Values[2];
+	                #tmpDWord.%B2 := #st_RD_Param.Data.Values[1];
+	                #tmpDWord.%B3 := #st_RD_Param.Data.Values[0];
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := DWORD_TO_LINT(#tmpDWord);
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no #Error
+	                #st_step := 100;
+	                
+	            8:  //FLOAT32
+	                #tmpDWord.%B0 := #st_RD_Param.Data.Values[3];
+	                #tmpDWord.%B1 := #st_RD_Param.Data.Values[2];
+	                #tmpDWord.%B2 := #st_RD_Param.Data.Values[1];
+	                #tmpDWord.%B3 := #st_RD_Param.Data.Values[0];
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := DWORD_TO_REAL(#tmpDWord);
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no #Error
+	                #st_step := 100;
+	                
+	            10:  //OctetString
+	                #tmpINT.%B0 := #st_RD_Param.Data.Values[0];
+	                #tmpINT.%B1 := #st_RD_Param.Data.Values[1];
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := INT_TO_LINT(#tmpINT);
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no #Error
+	                #st_step := 100;
+	                
+	                
+	            55, 56:  //LINT, ULINT
+	                #tmpLINT.%B0 := #st_RD_Param.Data.Values[7];
+	                #tmpLINT.%B1 := #st_RD_Param.Data.Values[6];
+	                #tmpLINT.%B2 := #st_RD_Param.Data.Values[5];
+	                #tmpLINT.%B3 := #st_RD_Param.Data.Values[4];
+	                #tmpLINT.%B4 := #st_RD_Param.Data.Values[3];
+	                #tmpLINT.%B5 := #st_RD_Param.Data.Values[2];
+	                #tmpLINT.%B6 := #st_RD_Param.Data.Values[1];
+	                #tmpLINT.%B7 := #st_RD_Param.Data.Values[0];
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := #tmpLINT;
+	                #ValueReadBOOL := FALSE;
+	                
+	                // no #Error
+	                #st_step := 100;
+	                
+	            68:  //Error
+	                #tmpDWord.%B0 := #st_RD_Param.Data.Values[1];
+	                #tmpDWord.%B1 := #st_RD_Param.Data.Values[0];
+	                #ErrorId := #tmpDWord OR #PD_Error;
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                // #Error
+	                #st_step := 200;
+	                
+	            ELSE
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                #ErrorId := 16#1000;    //unknown DataType
+	                // #Error
+	                #st_step := 200;
+	        END_CASE;
+	        
+	        
+	    50: //Write Parameter (First Read dataset then write dataset)
+	        // Lenght of the telegramm for reading
+	        #st_lenght := #LenHeader + #LenRead;
+	        
+	        #RDREC_Profidrive(REQ := #st_StartRW,
+	                          ID := #hardwareId,
+	                          INDEX := 16#b02e,
+	                          MLEN := #st_lenght,
+	                          STATUS => #st_StatusRead,
+	                          LEN => #st_LenghtRead,
+	                          RECORD := #st_RD_Param);
+	        
+	        IF #RDREC_Profidrive.VALID AND NOT #RDREC_Profidrive.BUSY THEN
+	            #st_ErrorCounter := 0;
+	            #st_step := 55;
+	        ELSIF #RDREC_Profidrive.ERROR THEN
+	            #tmpWord := DWORD_TO_WORD(SHR(IN := #st_StatusRead, N := 8));
+	            #st_wordhlp := #tmpWord;
+	            //try it again
+	            IF ((#tmpWord = 16#80A7) OR (#tmpWord = 16#80B5) OR (#tmpWord = 16#80C0) OR (#tmpWord = 16#80C1) OR (#tmpWord = 16#80C2)
+	                OR (#tmpWord = 16#80C3) OR (#tmpWord = 16#80C4)) AND (#st_ErrorCounter < #MaxRetryCounter) THEN
+	                #st_ErrorCounter := #st_ErrorCounter + 1;
+	                #st_StartRW := false;
+	                #st_StartTimer := TRUE;
+	            ELSE
+	                #st_step := 80;
+	            END_IF;
+	        END_IF;
+	        
+	    55:  //Reading finished
+	        CASE BYTE_TO_INT(#st_RD_Param.Data.Format) OF
+	            0:  //reserved
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                #ErrorId := 16#1001;    //reserved DataType
+	                // #Error
+	                #st_step := 200;
+	                
+	            1, 2, 3, 4, 5, 6, 7, 8, 55, 56, 65, 66, 67:
+	                #st_step := 60;
+	                
+	            68:  //Error
+	                #tmpDWord.%B0 := #st_RD_Param.Data.Values[1];
+	                #tmpDWord.%B1 := #st_RD_Param.Data.Values[0];
+	                #ErrorId := #tmpDWord OR #PD_Error;
+	                
+	                //copy the value to the output
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                // #Error
+	                #st_step := 200;
+	                
+	            ELSE
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                #ErrorId := 16#1000;    //unknown DataType
+	                // #Error
+	                #st_step := 200;
+	        END_CASE;
+	        
+	    60:  //reading Done from Write request
+	        (* ------------------ HEADER --------------------*)
+	        //Fill the Axis number
+	        #st_WR_Param.ReqHeader.AxisNo := #AxisNo;
+	        
+	        // Single parameter access
+	        #st_WR_Param.ReqHeader.ParaNo := 1;
+	        
+	        // Requst ID = 2 (Change Parameter)
+	        #st_WR_Param.ReqHeader.ReqId := 2;
+	        
+	        //Request reference starts with 1 and will count up 
+	        #st_WR_Param.ReqHeader.ReqRef := #st_ReqRef + 1;
+	        
+	        (* ------------------ DATA --------------------*)
+	        // Attribute
+	        #st_WR_Param.Data.Attribute := 16#10;
+	        
+	        // Single Access
+	        #st_WR_Param.Data.NoElements := 1;
+	        
+	        // PNU
+	        #st_WR_Param.Data.PNU := #ParameterNo;
+	        
+	        // Subindex
+	        #st_WR_Param.Data.Subindex := #Subindex;
+	        
+	        //Foramt
+	        #st_WR_Param.Data.Value[0] := #st_RD_Param.Data.Format;
+	        
+	        //No. Values
+	        #st_WR_Param.Data.Value[1] := 1;
+	        
+	        //erase send buffer
+	        FOR #i := 2 TO 9 DO
+	            #st_WR_Param.Data.Value[#i] := 0;
+	        END_FOR;
+	        
+	        CASE BYTE_TO_INT(#st_RD_Param.Data.Format) OF
+	            0:  //reserved
+	                #ValueReadREAL := 0;
+	                #ValueReadLINT := 0;
+	                #ValueReadBOOL := FALSE;
+	                
+	                #ErrorId := 16#1001;    //reserved DataType
+	                // #Error
+	                #st_step := 200;
+	                
+	            1:  //BOOL
+	                #st_WR_Param.Data.Value[2] := BOOL_TO_BYTE(#ValueWriteBOOL);
+	                
+	            2, 5, 65:  //SINT8, USINT8, BYTE
+	                #st_WR_Param.Data.Value[2] := LINT_TO_BYTE(#ValueWriteLINT);
+	                
+	            3, 6, 66:  //SINT16, UINT16, WORD
+	                #st_WR_Param.Data.Value[2] := #ValueWriteLINT.%B1;
+	                #st_WR_Param.Data.Value[3] := #ValueWriteLINT.%B0;
+	                
+	            4, 7, 67: //SINT32, UDINT32, DWORD
+	                #st_WR_Param.Data.Value[2] := #ValueWriteLINT.%B3;
+	                #st_WR_Param.Data.Value[3] := #ValueWriteLINT.%B2;
+	                #st_WR_Param.Data.Value[4] := #ValueWriteLINT.%B1;
+	                #st_WR_Param.Data.Value[5] := #ValueWriteLINT.%B0;
+	                
+	            8:  //FLOAT32
+	                #st_Real_aux := #ValueWriteREAL;
+	                #st_WR_Param.Data.Value[2] := #st_myRealAT[0];
+	                #st_WR_Param.Data.Value[3] := #st_myRealAT[1];
+	                #st_WR_Param.Data.Value[4] := #st_myRealAT[2];
+	                #st_WR_Param.Data.Value[5] := #st_myRealAT[3];
+	                
+	            55, 56:  //SINT64
+	                #st_WR_Param.Data.Value[2] := #ValueWriteLINT.%B7;
+	                #st_WR_Param.Data.Value[3] := #ValueWriteLINT.%B6;
+	                #st_WR_Param.Data.Value[4] := #ValueWriteLINT.%B5;
+	                #st_WR_Param.Data.Value[5] := #ValueWriteLINT.%B4;
+	                #st_WR_Param.Data.Value[6] := #ValueWriteLINT.%B3;
+	                #st_WR_Param.Data.Value[7] := #ValueWriteLINT.%B2;
+	                #st_WR_Param.Data.Value[8] := #ValueWriteLINT.%B1;
+	                #st_WR_Param.Data.Value[9] := #ValueWriteLINT.%B0;
+	                
+	        END_CASE;
+	        
+	        //goto the next step
+	        #st_step := 61;
+	        
+	    61:  //send the write Request
+	        // Lenght of the telegramm to be send
+	        #st_lenght := #LenHeader + #LenWrite;
+	        
+	        #WRREC_Profidrive(REQ := #st_StartRW,
+	                          ID := #hardwareId,
+	                          INDEX := 16#b02e,
+	                          LEN := #st_lenght,
+	                          STATUS => #st_StatusWR,
+	                          RECORD := #st_WR_Param);
+	        
+	        IF #WRREC_Profidrive.DONE THEN
+	            #st_step := 62;
+	        ELSIF #WRREC_Profidrive.ERROR THEN
+	            #tmpWord := DWORD_TO_WORD(SHR(IN := #st_StatusWR, N := 8));
+	            #st_wordhlp := #tmpWord;
+	            //try it again
+	            IF ((#tmpWord = 16#80A7) OR (#tmpWord = 16#80B5) OR (#tmpWord = 16#80C0) OR (#tmpWord = 16#80C1) OR (#tmpWord = 16#80C2)
+	                OR (#tmpWord = 16#80C3) OR (#tmpWord = 16#80C4)) AND (#st_ErrorCounter < #MaxRetryCounter) THEN
+	                #st_ErrorCounter := #st_ErrorCounter + 1;
+	                #st_StartRW := false;
+	                #st_StartTimer := TRUE;
+	            ELSE
+	                #st_step := 90;
+	            END_IF;
+	        END_IF;
+	        
+	    62:  //Read the answer of the write request
+	        
+	        //delete old response values
+	        #st_RD_Param.RespHeader.ReqRefMir := 0;
+	        #st_RD_Param.RespHeader.RespId := 0;
+	        #st_RD_Param.RespHeader.AxisNo := 0;
+	        #st_RD_Param.RespHeader.ParaNo := 0;
+	        #st_RD_Param.Data.Format := 0;
+	        #st_RD_Param.Data.NoValues := 0;
+	        #st_RD_Param.Data.Values[0] := 0;
+	        #st_RD_Param.Data.Values[1] := 0;
+	        
+	        // Lenght of the telegramm for reading
+	        #st_lenght := #LenHeader + #LenRead;
+	        
+	        #RDREC_Profidrive(REQ := #st_StartRW,
+	                          ID := #hardwareId,
+	                          INDEX := 16#b02e,
+	                          MLEN := #st_lenght,
+	                          STATUS => #st_StatusRead,
+	                          LEN => #st_LenghtRead,
+	                          RECORD := #st_RD_Param);
+	        
+	        IF #RDREC_Profidrive.VALID AND NOT #RDREC_Profidrive.BUSY THEN
+	            #st_ErrorCounter := 0;
+	            #st_step := 63;
+	        ELSIF #RDREC_Profidrive.ERROR THEN
+	            #tmpWord := DWORD_TO_WORD(SHR(IN := #st_StatusRead, N := 8));
+	            #st_wordhlp := #tmpWord;
+	            //try it again
+	            IF ((#tmpWord = 16#80A7) OR (#tmpWord = 16#80B5) OR (#tmpWord = 16#80C0) OR (#tmpWord = 16#80C1) OR (#tmpWord = 16#80C2)
+	                OR (#tmpWord = 16#80C3) OR (#tmpWord = 16#80C4)) AND (#st_ErrorCounter < #MaxRetryCounter) THEN
+	                #st_ErrorCounter := #st_ErrorCounter + 1;
+	                #st_StartRW := false;
+	                #st_StartTimer := TRUE;
+	            ELSE
+	                #st_step := 80;
+	            END_IF;
+	        END_IF;
+	        
+	    63:  //Reading finished
+	        CASE BYTE_TO_INT(#st_RD_Param.RespHeader.RespId) OF
+	                
+	            2:  //positive resonse
+	                #st_step := 150;
+	                
+	            128..130:  //negative response
+	                IF #st_RD_Param.Data.Format = 68 THEN
+	                    #tmpDWord.%B0 := #st_RD_Param.Data.Values[1];
+	                    #tmpDWord.%B1 := #st_RD_Param.Data.Values[0];
+	                    #ErrorId := #tmpDWord OR #PD_Error;
+	                    
+	                    // #Error
+	                    #st_step := 200;
+	                ELSE
+	                    #ErrorId := 16#1003; //negative response without error code
+	                    #st_step := 300;
+	                    
+	                END_IF;
+	            ELSE  //undefined response ID
+	                #ErrorId := 16#1002;
+	                #st_step := 300;
+	        END_CASE;
+	        
+	    70: // Error while ReadWrite Access
+	        #Done := true;
+	        #Busy := false;
+	        #Error := TRUE;
+	        #ErrorId := #st_StatusRW;
+	        
+	    80: //Error Reading Access
+	        #Done := true;
+	        #Busy := false;
+	        #Error := TRUE;
+	        #ErrorId := #st_StatusRead;
+	        
+	    90:  // Error while Write Access
+	        #Done := true;
+	        #Busy := false;
+	        #Error := TRUE;
+	        #ErrorId := #st_StatusWR;
+	        
+	        
+	    100: // read successfully
+	        #Done := true;
+	        #Busy := false;
+	        #Error := false;
+	        
+	    150:// write successfully
+	        #Done := true;
+	        #Busy := false;
+	        #Error := false;
+	        
+	    200:  //Error while reading
+	        #Done := true;
+	        #Busy := false;
+	        #Error := TRUE;
+	        
+	    300:  //Error while writing
+	        #Done := true;
+	        #Busy := false;
+	        #Error := TRUE;
+	        
+	END_CASE;
+	
+	IF NOT #Enable THEN
+	    #st_step := 0;
+	    #st_ReqRef := 1;
+	    #Done := false;
+	    #Busy := false;
+	    #Error := false;
+	    #ErrorId := 16#00000000;
+	    #ValueReadBOOL := false;
+	    #ValueReadLINT := 0;
+	    #ValueReadREAL := 0.0;
+	    #st_StatusRead := 0;
+	    #st_ErrorCounter := 0;
+	END_IF;
+END_FUNCTION_BLOCK
+

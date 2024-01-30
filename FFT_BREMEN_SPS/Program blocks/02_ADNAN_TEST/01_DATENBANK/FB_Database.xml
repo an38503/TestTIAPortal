@@ -1,0 +1,783 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Engineering version="V17" />
+  <DocumentInfo>
+    <Created>2024-01-30T08:49:14.5749572Z</Created>
+    <ExportSetting>WithDefaults</ExportSetting>
+    <InstalledProducts>
+      <Product>
+        <DisplayName>Totally Integrated Automation Portal</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </Product>
+      <OptionPackage>
+        <DisplayName>TIA Portal Openness</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </OptionPackage>
+      <OptionPackage>
+        <DisplayName>TIA Portal Version Control Interface</DisplayName>
+        <DisplayVersion>V17</DisplayVersion>
+      </OptionPackage>
+      <Product>
+        <DisplayName>STEP 7 Professional</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </Product>
+      <OptionPackage>
+        <DisplayName>STEP 7 Safety</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </OptionPackage>
+      <Product>
+        <DisplayName>WinCC Advanced</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </Product>
+    </InstalledProducts>
+  </DocumentInfo>
+  <SW.Blocks.FB ID="0">
+    <AttributeList>
+      <AutoNumber>true</AutoNumber>
+      <HeaderAuthor />
+      <HeaderFamily />
+      <HeaderName />
+      <HeaderVersion>0.1</HeaderVersion>
+      <Interface><Sections xmlns="http://www.siemens.com/automation/Openness/SW/Interface/v5">
+  <Section Name="Input" />
+  <Section Name="Output" />
+  <Section Name="InOut" />
+  <Section Name="Static">
+    <Member Name="task" Datatype="Int" Remanence="NonRetain" Accessibility="Public"><AttributeList><BooleanAttribute Name="ExternalAccessible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalVisible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalWritable" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="SetPoint" SystemDefined="true">false</BooleanAttribute></AttributeList></Member>
+    <Member Name="Task_Start" Datatype="Bool" Remanence="NonRetain" Accessibility="Public"><AttributeList><BooleanAttribute Name="ExternalAccessible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalVisible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalWritable" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="SetPoint" SystemDefined="true">false</BooleanAttribute></AttributeList></Member>
+    <Member Name="TON_Act_Script" Datatype="TON_TIME" Version="1.0" Remanence="NonRetain" Accessibility="Public"><AttributeList><BooleanAttribute Name="ExternalAccessible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalVisible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalWritable" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="SetPoint" SystemDefined="true">true</BooleanAttribute></AttributeList><Sections><Section Name="None"><Member Name="PT" Datatype="Time" /><Member Name="ET" Datatype="Time" /><Member Name="IN" Datatype="Bool" /><Member Name="Q" Datatype="Bool" /></Section></Sections></Member>
+  </Section>
+  <Section Name="Temp">
+    <Member Name="Request" Datatype="Struct">
+      <Member Name="Task_001" Datatype="Bool" />
+      <Member Name="Task_002" Datatype="Bool" />
+      <Member Name="Task_003" Datatype="Bool" />
+      <Member Name="Task_004" Datatype="Bool" />
+    </Member>
+  </Section>
+  <Section Name="Constant">
+    <Member Name="S001_Get_Data" Datatype="Int" Accessibility="Public">
+      <StartValue>1</StartValue>
+    </Member>
+    <Member Name="S002_Write_Data" Datatype="Int" Accessibility="Public">
+      <StartValue>2</StartValue>
+    </Member>
+  </Section>
+</Sections></Interface>
+      <IsIECCheckEnabled>false</IsIECCheckEnabled>
+      <IsRetainMemResEnabled>false</IsRetainMemResEnabled>
+      <MemoryLayout>Optimized</MemoryLayout>
+      <MemoryReserve>100</MemoryReserve>
+      <Name>FB_Database</Name>
+      <Number>2</Number>
+      <ProgrammingLanguage>LAD</ProgrammingLanguage>
+      <SetENOAutomatically>false</SetENOAutomatically>
+      <UDABlockProperties />
+      <UDAEnableTagReadback>false</UDAEnableTagReadback>
+    </AttributeList>
+    <ObjectList>
+      <MultilingualText ID="1" CompositionName="Comment">
+        <ObjectList>
+          <MultilingualTextItem ID="2" CompositionName="Items">
+            <AttributeList>
+              <Culture>de-DE</Culture>
+              <Text />
+            </AttributeList>
+          </MultilingualTextItem>
+        </ObjectList>
+      </MultilingualText>
+      <SW.Blocks.CompileUnit ID="3" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource><StatementList xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/StatementList/v4">
+  <StlStatement UId="29">
+    <LineComment Inserted="false">
+      <Text> Reset Task Requests</Text>
+    </LineComment>
+    <StlToken Text="COMMENT" />
+  </StlStatement>
+  <StlStatement UId="24">
+    <StlToken Text="A" />
+    <Access Scope="GlobalVariable">
+      <Symbol>
+        <Component Name="GDB_HMI" />
+        <Component Name="Database" />
+        <Component Name="Reset_Task" />
+      </Symbol>
+    </Access>
+  </StlStatement>
+  <StlStatement UId="22">
+    <StlToken Text="R" />
+    <Access Scope="GlobalVariable">
+      <Symbol>
+        <Component Name="GDB_Database" />
+        <Component Name="Requests" />
+        <Component Name="Read_from_DB" />
+      </Symbol>
+    </Access>
+  </StlStatement>
+  <StlStatement UId="26">
+    <StlToken Text="R" />
+    <Access Scope="GlobalVariable">
+      <Symbol>
+        <Component Name="GDB_Database" />
+        <Component Name="Requests" />
+        <Component Name="Write_to_DB" />
+      </Symbol>
+    </Access>
+  </StlStatement>
+  <StlStatement UId="28">
+    <StlToken Text="EMPTY_LINE" />
+  </StlStatement>
+  <StlStatement UId="25">
+    <StlToken Text="EMPTY_LINE" />
+  </StlStatement>
+</StatementList></NetworkSource>
+          <ProgrammingLanguage>STL</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="4" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="5" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text>
+</Text>
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="6" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="7" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text>Reset Task Requests</Text>
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <SW.Blocks.CompileUnit ID="8" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource><StructuredText xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/StructuredText/v3">
+  <Access Scope="LocalVariable" UId="21">
+    <Symbol UId="22">
+      <Component Name="Request" UId="23" />
+      <Token Text="." UId="24" />
+      <Component Name="Task_001" UId="25" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="26" />
+  <Token Text=":=" UId="27" />
+  <Blank Num="1" UId="28" />
+  <Access Scope="GlobalVariable" UId="29">
+    <Symbol UId="30">
+      <Component Name="GDB_Database" UId="31" />
+      <Token Text="." UId="32" />
+      <Component Name="Requests" UId="33" />
+      <Token Text="." UId="34" />
+      <Component Name="Read_from_DB" UId="35" />
+    </Symbol>
+  </Access>
+  <Token Text=";" UId="36" />
+  <NewLine Num="1" UId="37" />
+  <Access Scope="LocalVariable" UId="38">
+    <Symbol UId="39">
+      <Component Name="Request" UId="40" />
+      <Token Text="." UId="41" />
+      <Component Name="Task_002" UId="42" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="43" />
+  <Token Text=":=" UId="44" />
+  <Blank Num="1" UId="45" />
+  <Access Scope="GlobalVariable" UId="46">
+    <Symbol UId="47">
+      <Component Name="GDB_Database" UId="48" />
+      <Token Text="." UId="49" />
+      <Component Name="Requests" UId="50" />
+      <Token Text="." UId="51" />
+      <Component Name="Write_to_DB" UId="52" />
+    </Symbol>
+  </Access>
+  <Token Text=";" UId="53" />
+</StructuredText></NetworkSource>
+          <ProgrammingLanguage>SCL</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="9" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="A" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="B" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="C" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text>Task Start Request</Text>
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <SW.Blocks.CompileUnit ID="D" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource><StructuredText xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/StructuredText/v3">
+  <LineComment Inserted="false" NoClosingBracket="false" UId="21">
+    <Text UId="22"> Set task</Text>
+  </LineComment>
+  <NewLine Num="1" UId="23" />
+  <Token Text="IF" UId="24" />
+  <Blank Num="1" UId="25" />
+  <Access Scope="LocalVariable" UId="26">
+    <Symbol UId="27">
+      <Component Name="Request" UId="28" />
+      <Token Text="." UId="29" />
+      <Component Name="Task_001" UId="30" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="31" />
+  <Token Text="AND" UId="32" />
+  <Blank Num="1" UId="33" />
+  <Token Text="(" UId="34" />
+  <Access Scope="LocalVariable" UId="35">
+    <Symbol UId="36">
+      <Component Name="task" UId="37" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="38" />
+  <Token Text="=" UId="39" />
+  <Blank Num="1" UId="40" />
+  <Access Scope="LiteralConstant" UId="41">
+    <Constant UId="42">
+      <ConstantValue UId="44">0</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=")" UId="45" />
+  <Blank Num="1" UId="46" />
+  <Token Text="THEN" UId="47" />
+  <NewLine Num="1" UId="48" />
+  <Blank Num="4" UId="49" />
+  <Access Scope="LocalVariable" UId="50">
+    <Symbol UId="51">
+      <Component Name="task" UId="52" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="53" />
+  <Token Text=":=" UId="54" />
+  <Blank Num="1" UId="55" />
+  <Access Scope="LiteralConstant" UId="56">
+    <Constant UId="57">
+      <ConstantValue UId="59">10</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="60" />
+  <NewLine Num="1" UId="61" />
+  <Token Text="END_IF" UId="62" />
+  <Token Text=";" UId="63" />
+  <NewLine Num="3" UId="64" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="65">
+    <Text UId="66">Fullfill task</Text>
+  </LineComment>
+  <NewLine Num="1" UId="67" />
+  <Token Text="IF" UId="68" />
+  <Blank Num="1" UId="69" />
+  <Access Scope="LocalVariable" UId="70">
+    <Symbol UId="71">
+      <Component Name="task" UId="72" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="73" />
+  <Token Text="=" UId="74" />
+  <Blank Num="1" UId="75" />
+  <Access Scope="LiteralConstant" UId="76">
+    <Constant UId="77">
+      <ConstantValue UId="79">10</ConstantValue>
+    </Constant>
+  </Access>
+  <Blank Num="1" UId="80" />
+  <Token Text="THEN" UId="81" />
+  <NewLine Num="1" UId="82" />
+  <Blank Num="4" UId="83" />
+  <NewLine Num="1" UId="84" />
+  <Blank Num="4" UId="85" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="86">
+    <Text UId="87"> If reading is done</Text>
+  </LineComment>
+  <NewLine Num="1" UId="88" />
+  <Blank Num="4" UId="89" />
+  <Token Text="IF" UId="90" />
+  <Blank Num="1" UId="91" />
+  <Access Scope="GlobalVariable" UId="92">
+    <Symbol UId="93">
+      <Component Name="GDB_Database" UId="94" />
+      <Token Text="." UId="95" />
+      <Component Name="Communication" UId="96" />
+      <Token Text="." UId="97" />
+      <Component Name="Done" UId="98" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="99" />
+  <Token Text="=" UId="100" />
+  <Blank Num="1" UId="101" />
+  <Access Scope="LocalConstant" UId="102">
+    <Constant Name="S001_Get_Data" UId="103" />
+  </Access>
+  <Blank Num="1" UId="106" />
+  <Token Text="AND" UId="107" />
+  <Blank Num="1" UId="108" />
+  <Token Text="NOT" UId="109" />
+  <Blank Num="1" UId="110" />
+  <Access Scope="GlobalVariable" UId="111">
+    <Symbol UId="112">
+      <Component Name="GDB_Database" UId="113" />
+      <Token Text="." UId="114" />
+      <Component Name="Task_Done" UId="115" />
+      <Token Text="." UId="116" />
+      <Component Name="Read_from_DB" UId="117" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="118" />
+  <Token Text="AND" UId="119" />
+  <Blank Num="1" UId="120" />
+  <Access Scope="GlobalVariable" UId="121">
+    <Symbol UId="122">
+      <Component Name="GDB_Database" UId="123" />
+      <Token Text="." UId="124" />
+      <Component Name="Communication" UId="125" />
+      <Token Text="." UId="126" />
+      <Component Name="Error" UId="127" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="128" />
+  <Token Text="=" UId="129" />
+  <Blank Num="1" UId="130" />
+  <Access Scope="LiteralConstant" UId="131">
+    <Constant UId="132">
+      <ConstantValue UId="134">0</ConstantValue>
+    </Constant>
+  </Access>
+  <Blank Num="1" UId="135" />
+  <Token Text="THEN" UId="136" />
+  <NewLine Num="1" UId="137" />
+  <Blank Num="7" UId="138" />
+  <NewLine Num="1" UId="139" />
+  <Blank Num="8" UId="140" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="141">
+    <Text UId="142"> Write Data from DB Receive ( on HMI Tags ) to DB on SPS</Text>
+  </LineComment>
+  <NewLine Num="1" UId="143" />
+  <Blank Num="7" UId="144" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="145">
+    <Text UId="146"> "GDB_HMI".Received_Data_from_DB.Rob_PRG := "GDB_Database".Receive.Rob_PRG;</Text>
+  </LineComment>
+  <NewLine Num="1" UId="147" />
+  <Blank Num="7" UId="148" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="149">
+    <Text UId="150"> "GDB_HMI".Received_Data_from_DB.Force := "GDB_Database".Receive.Force;</Text>
+  </LineComment>
+  <NewLine Num="1" UId="151" />
+  <Blank Num="8" UId="152" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="153">
+    <Text UId="154"> Set that Task is active</Text>
+  </LineComment>
+  <NewLine Num="1" UId="155" />
+  <Blank Num="8" UId="156" />
+  <Access Scope="GlobalVariable" UId="157">
+    <Symbol UId="158">
+      <Component Name="GDB_Database" UId="159" />
+      <Token Text="." UId="160" />
+      <Component Name="Task_Done" UId="161" />
+      <Token Text="." UId="162" />
+      <Component Name="Read_from_DB" UId="163" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="164" />
+  <Token Text=":=" UId="165" />
+  <Blank Num="1" UId="166" />
+  <Access Scope="LiteralConstant" UId="167">
+    <Constant UId="168">
+      <ConstantValue UId="170">TRUE</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="171" />
+  <NewLine Num="1" UId="172" />
+  <Blank Num="8" UId="173" />
+  <NewLine Num="1" UId="174" />
+  <Blank Num="4" UId="175" />
+  <Token Text="END_IF" UId="176" />
+  <Token Text=";" UId="177" />
+  <NewLine Num="1" UId="178" />
+  <Blank Num="4" UId="179" />
+  <NewLine Num="1" UId="180" />
+  <Blank Num="4" UId="181" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="182">
+    <Text UId="183"> Control script</Text>
+  </LineComment>
+  <NewLine Num="1" UId="184" />
+  <Blank Num="4" UId="185" />
+  <Token Text="IF" UId="186" />
+  <Blank Num="1" UId="187" />
+  <Access Scope="LocalVariable" UId="188">
+    <Symbol UId="189">
+      <Component Name="Request" UId="190" />
+      <Token Text="." UId="191" />
+      <Component Name="Task_001" UId="192" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="193" />
+  <Token Text="THEN" UId="194" />
+  <NewLine Num="1" UId="195" />
+  <Blank Num="8" UId="196" />
+  <Access Scope="GlobalVariable" UId="197">
+    <Symbol UId="198">
+      <Component Name="GDB_Database" UId="199" />
+      <Token Text="." UId="200" />
+      <Component Name="Communication" UId="201" />
+      <Token Text="." UId="202" />
+      <Component Name="Function" UId="203" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="204" />
+  <Token Text=":=" UId="205" />
+  <Blank Num="1" UId="206" />
+  <Access Scope="LocalConstant" UId="207">
+    <Constant Name="S001_Get_Data" UId="208" />
+  </Access>
+  <Token Text=";" UId="211" />
+  <NewLine Num="1" UId="212" />
+  <Blank Num="8" UId="213" />
+  <Access Scope="LocalVariable" UId="214">
+    <Symbol UId="215">
+      <Component Name="Task_Start" UId="216" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="217" />
+  <Token Text=":=" UId="218" />
+  <Blank Num="1" UId="219" />
+  <Access Scope="LiteralConstant" UId="220">
+    <Constant UId="221">
+      <ConstantValue UId="223">TRUE</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="224" />
+  <NewLine Num="1" UId="225" />
+  <Blank Num="4" UId="226" />
+  <Token Text="ELSE" UId="227" />
+  <NewLine Num="1" UId="228" />
+  <Blank Num="8" UId="229" />
+  <Access Scope="GlobalVariable" UId="230">
+    <Symbol UId="231">
+      <Component Name="GDB_Database" UId="232" />
+      <Token Text="." UId="233" />
+      <Component Name="Communication" UId="234" />
+      <Token Text="." UId="235" />
+      <Component Name="Function" UId="236" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="237" />
+  <Token Text=":=" UId="238" />
+  <Blank Num="1" UId="239" />
+  <Access Scope="LiteralConstant" UId="240">
+    <Constant UId="241">
+      <ConstantValue UId="243">0</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="244" />
+  <NewLine Num="1" UId="245" />
+  <Blank Num="8" UId="246" />
+  <Access Scope="LocalVariable" UId="247">
+    <Symbol UId="248">
+      <Component Name="Task_Start" UId="249" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="250" />
+  <Token Text=":=" UId="251" />
+  <Blank Num="1" UId="252" />
+  <Access Scope="LiteralConstant" UId="253">
+    <Constant UId="254">
+      <ConstantValue UId="256">FALSE</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="257" />
+  <NewLine Num="1" UId="258" />
+  <Blank Num="8" UId="259" />
+  <Token Text="IF" UId="260" />
+  <Blank Num="1" UId="261" />
+  <Token Text="NOT" UId="262" />
+  <Blank Num="1" UId="263" />
+  <Access Scope="GlobalVariable" UId="264">
+    <Symbol UId="265">
+      <Component Name="GDB_Database" UId="266" />
+      <Token Text="." UId="267" />
+      <Component Name="Communication" UId="268" />
+      <Token Text="." UId="269" />
+      <Component Name="Active" UId="270" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="271" />
+  <Token Text="AND" UId="272" />
+  <Blank Num="1" UId="273" />
+  <Access Scope="GlobalVariable" UId="274">
+    <Symbol UId="275">
+      <Component Name="GDB_Database" UId="276" />
+      <Token Text="." UId="277" />
+      <Component Name="Communication" UId="278" />
+      <Token Text="." UId="279" />
+      <Component Name="Done" UId="280" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="281" />
+  <Token Text="=" UId="282" />
+  <Blank Num="1" UId="283" />
+  <Access Scope="LiteralConstant" UId="284">
+    <Constant UId="285">
+      <ConstantValue UId="287">0</ConstantValue>
+    </Constant>
+  </Access>
+  <Blank Num="1" UId="288" />
+  <Token Text="THEN" UId="289" />
+  <NewLine Num="1" UId="290" />
+  <Blank Num="12" UId="291" />
+  <Access Scope="LocalVariable" UId="292">
+    <Symbol UId="293">
+      <Component Name="task" UId="294" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="295" />
+  <Token Text=":=" UId="296" />
+  <Blank Num="1" UId="297" />
+  <Access Scope="LiteralConstant" UId="298">
+    <Constant UId="299">
+      <ConstantValue UId="301">0</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="302" />
+  <NewLine Num="1" UId="303" />
+  <Blank Num="8" UId="304" />
+  <Token Text="END_IF" UId="305" />
+  <Token Text=";" UId="306" />
+  <NewLine Num="1" UId="307" />
+  <Blank Num="4" UId="308" />
+  <Token Text="END_IF" UId="309" />
+  <Token Text=";" UId="310" />
+  <NewLine Num="1" UId="311" />
+  <Token Text="END_IF" UId="312" />
+  <Token Text=";" UId="313" />
+  <NewLine Num="2" UId="314" />
+  <LineComment Inserted="false" NoClosingBracket="false" UId="315">
+    <Text UId="316"> Reset Done</Text>
+  </LineComment>
+  <NewLine Num="1" UId="317" />
+  <Token Text="IF" UId="318" />
+  <Blank Num="1" UId="319" />
+  <Token Text="NOT" UId="320" />
+  <Blank Num="1" UId="321" />
+  <Access Scope="LocalVariable" UId="322">
+    <Symbol UId="323">
+      <Component Name="Request" UId="324" />
+      <Token Text="." UId="325" />
+      <Component Name="Task_001" UId="326" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="327" />
+  <Token Text="THEN" UId="328" />
+  <NewLine Num="1" UId="329" />
+  <Blank Num="4" UId="330" />
+  <Access Scope="GlobalVariable" UId="331">
+    <Symbol UId="332">
+      <Component Name="GDB_Database" UId="333" />
+      <Token Text="." UId="334" />
+      <Component Name="Task_Done" UId="335" />
+      <Token Text="." UId="336" />
+      <Component Name="Read_from_DB" UId="337" />
+    </Symbol>
+  </Access>
+  <Blank Num="1" UId="338" />
+  <Token Text=":=" UId="339" />
+  <Blank Num="1" UId="340" />
+  <Access Scope="LiteralConstant" UId="341">
+    <Constant UId="342">
+      <ConstantValue UId="344">FALSE</ConstantValue>
+    </Constant>
+  </Access>
+  <Token Text=";" UId="345" />
+  <NewLine Num="1" UId="346" />
+  <Token Text="END_IF" UId="347" />
+  <Token Text=";" UId="348" />
+  <NewLine Num="2" UId="349" />
+  <Blank Num="4" UId="350" />
+  <NewLine Num="1" UId="351" />
+  <Blank Num="8" UId="352" />
+  <NewLine Num="1" UId="353" />
+  <Blank Num="8" UId="354" />
+  <NewLine Num="1" UId="355" />
+  <Blank Num="8" UId="356" />
+  <NewLine Num="1" UId="357" />
+  <Blank Num="8" UId="358" />
+  <NewLine Num="1" UId="359" />
+  <Blank Num="8" UId="360" />
+  <NewLine Num="1" UId="361" />
+  <Blank Num="4" UId="362" />
+  <NewLine Num="6" UId="363" />
+</StructuredText></NetworkSource>
+          <ProgrammingLanguage>SCL</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="E" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="F" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="10" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="11" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text>10 = Request for read Global Data</Text>
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <SW.Blocks.CompileUnit ID="12" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource><FlgNet xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/FlgNet/v4">
+  <Parts>
+    <Access Scope="LocalVariable" UId="21">
+      <Symbol>
+        <Component Name="Task_Start" />
+      </Symbol>
+    </Access>
+    <Access Scope="TypedConstant" UId="22">
+      <Constant>
+        <ConstantValue>T#1s</ConstantValue>
+      </Constant>
+    </Access>
+    <Access Scope="GlobalVariable" UId="23">
+      <Symbol>
+        <Component Name="GDB_Database" />
+        <Component Name="Communication" />
+        <Component Name="Start" />
+      </Symbol>
+    </Access>
+    <Part Name="Contact" UId="24" />
+    <Part Name="TON" Version="1.0" UId="25">
+      <Instance Scope="LocalVariable" UId="26">
+        <Component Name="TON_Act_Script" />
+      </Instance>
+      <TemplateValue Name="time_type" Type="Type">Time</TemplateValue>
+    </Part>
+    <Part Name="Coil" UId="27" />
+  </Parts>
+  <Wires>
+    <Wire UId="29">
+      <Powerrail />
+      <NameCon UId="24" Name="in" />
+    </Wire>
+    <Wire UId="30">
+      <IdentCon UId="21" />
+      <NameCon UId="24" Name="operand" />
+    </Wire>
+    <Wire UId="31">
+      <NameCon UId="24" Name="out" />
+      <NameCon UId="25" Name="IN" />
+    </Wire>
+    <Wire UId="32">
+      <IdentCon UId="22" />
+      <NameCon UId="25" Name="PT" />
+    </Wire>
+    <Wire UId="33">
+      <NameCon UId="25" Name="Q" />
+      <NameCon UId="27" Name="in" />
+    </Wire>
+    <Wire UId="34">
+      <NameCon UId="25" Name="ET" />
+      <OpenCon UId="28" />
+    </Wire>
+    <Wire UId="35">
+      <IdentCon UId="23" />
+      <NameCon UId="27" Name="operand" />
+    </Wire>
+  </Wires>
+</FlgNet></NetworkSource>
+          <ProgrammingLanguage>LAD</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="13" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="14" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="15" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="16" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <SW.Blocks.CompileUnit ID="17" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource />
+          <ProgrammingLanguage>LAD</ProgrammingLanguage>
+        </AttributeList>
+        <ObjectList>
+          <MultilingualText ID="18" CompositionName="Comment">
+            <ObjectList>
+              <MultilingualTextItem ID="19" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+          <MultilingualText ID="1A" CompositionName="Title">
+            <ObjectList>
+              <MultilingualTextItem ID="1B" CompositionName="Items">
+                <AttributeList>
+                  <Culture>de-DE</Culture>
+                  <Text />
+                </AttributeList>
+              </MultilingualTextItem>
+            </ObjectList>
+          </MultilingualText>
+        </ObjectList>
+      </SW.Blocks.CompileUnit>
+      <MultilingualText ID="1C" CompositionName="Title">
+        <ObjectList>
+          <MultilingualTextItem ID="1D" CompositionName="Items">
+            <AttributeList>
+              <Culture>de-DE</Culture>
+              <Text />
+            </AttributeList>
+          </MultilingualTextItem>
+        </ObjectList>
+      </MultilingualText>
+    </ObjectList>
+  </SW.Blocks.FB>
+</Document>

@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Engineering version="V17" />
+  <DocumentInfo>
+    <Created>2024-01-30T08:49:14.1769563Z</Created>
+    <ExportSetting>WithDefaults</ExportSetting>
+    <InstalledProducts>
+      <Product>
+        <DisplayName>Totally Integrated Automation Portal</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </Product>
+      <OptionPackage>
+        <DisplayName>TIA Portal Openness</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </OptionPackage>
+      <OptionPackage>
+        <DisplayName>TIA Portal Version Control Interface</DisplayName>
+        <DisplayVersion>V17</DisplayVersion>
+      </OptionPackage>
+      <Product>
+        <DisplayName>STEP 7 Professional</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </Product>
+      <OptionPackage>
+        <DisplayName>STEP 7 Safety</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </OptionPackage>
+      <Product>
+        <DisplayName>WinCC Advanced</DisplayName>
+        <DisplayVersion>V17 Update 6</DisplayVersion>
+      </Product>
+    </InstalledProducts>
+  </DocumentInfo>
+  <SW.Blocks.InstanceDB ID="0">
+    <AttributeList>
+      <AutoNumber>true</AutoNumber>
+      <DBAccessibleFromOPCUA>true</DBAccessibleFromOPCUA>
+      <DBAccessibleFromWebserver>true</DBAccessibleFromWebserver>
+      <HeaderAuthor />
+      <HeaderFamily />
+      <HeaderName />
+      <HeaderVersion>0.1</HeaderVersion>
+      <InstanceOfName>FESTO_CMMT_ST</InstanceOfName>
+      <InstanceOfType>FB</InstanceOfType>
+      <Interface><Sections xmlns="http://www.siemens.com/automation/Openness/SW/Interface/v5">
+  <Section Name="Input" />
+  <Section Name="Output" />
+  <Section Name="InOut" />
+  <Section Name="Static">
+    <Member Name="Festo_PtP_Drives_PN_Instance" Datatype="&quot;Festo_PtP_Drives_PN&quot;" Accessibility="Public"><AttributeList><BooleanAttribute Name="ExternalAccessible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalVisible" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="ExternalWritable" SystemDefined="true">true</BooleanAttribute><BooleanAttribute Name="SetPoint" SystemDefined="true">true</BooleanAttribute></AttributeList><Sections><Section Name="Input"><Member Name="ModePos" Datatype="Int" /><Member Name="EnableAxis" Datatype="Bool" /><Member Name="CancelTraversing" Datatype="Bool" /><Member Name="IntermediateStop" Datatype="Bool" /><Member Name="Positive" Datatype="Bool" /><Member Name="Negative" Datatype="Bool" /><Member Name="Jog1" Datatype="Bool" /><Member Name="Jog2" Datatype="Bool" /><Member Name="AckError" Datatype="Bool" /><Member Name="ExecuteMode" Datatype="Bool" /><Member Name="ReleaseBrake" Datatype="Bool" /><Member Name="TravelToFixStop" Datatype="Bool" /><Member Name="Position" Datatype="DInt" /><Member Name="Velocity" Datatype="DInt" /><Member Name="OverV" Datatype="Int" /><Member Name="OverAcc" Datatype="Int" /><Member Name="OverDec" Datatype="Int" /><Member Name="ConfigEPos" Datatype="DWord" /><Member Name="BaseSpeedValue" Datatype="Real" /><Member Name="HardwareId" Datatype="HW_IO" /></Section><Section Name="Output"><Member Name="AxisEnabled" Datatype="Bool" /><Member Name="AxisPosOk" Datatype="Bool" /><Member Name="AxisSpFixed" Datatype="Bool" /><Member Name="AxisAckSetpoint" Datatype="Bool" /><Member Name="ClampTorqueReached" Datatype="Bool" /><Member Name="AxisRef" Datatype="Bool" /><Member Name="AxisWarn" Datatype="Bool" /><Member Name="AxisError" Datatype="Bool" /><Member Name="Lockout" Datatype="Bool" /><Member Name="ActVelocity" Datatype="Real" /><Member Name="ActPosition" Datatype="DInt" /><Member Name="ActMode" Datatype="Int" /><Member Name="EPosZSW1" Datatype="Word" /><Member Name="EPosZSW2" Datatype="Word" /><Member Name="ActWarn" Datatype="Word" /><Member Name="ActFault" Datatype="Word" /><Member Name="Error" Datatype="Bool" /><Member Name="Status" Datatype="Word" /><Member Name="DiagID" Datatype="Word" /></Section><Section Name="InOut" /><Section Name="Static"><Member Name="stat_Ready4Motion" Datatype="Bool" /><Member Name="stat_ExecuteIntern" Datatype="Bool" /><Member Name="stat_StepHome" Datatype="UInt" /><Member Name="stat_RetDPRD" Datatype="Int" /><Member Name="stat_RetDPWR" Datatype="Int" /><Member Name="stat_CycWrite" Datatype="Struct"><Member Name="STW1" Datatype="Struct"><Member Name="jog1" Datatype="Bool" /><Member Name="jog2" Datatype="Bool" /><Member Name="controlByPlc" Datatype="Bool" /><Member Name="StartHoming" Datatype="Bool" /><Member Name="ReleaseBrake" Datatype="Bool" /><Member Name="ExternalBlockChange" Datatype="Bool" /><Member Name="reserved14" Datatype="Bool" /><Member Name="reserved15" Datatype="Bool" /><Member Name="on" Datatype="Bool" /><Member Name="noCoastStop" Datatype="Bool" /><Member Name="noQuickStop" Datatype="Bool" /><Member Name="enableOperation" Datatype="Bool" /><Member Name="cancelTraversing" Datatype="Bool" /><Member Name="intermediateStop" Datatype="Bool" /><Member Name="activateTraversing" Datatype="Bool" /><Member Name="acknowledgeFault" Datatype="Bool" /></Member><Member Name="POS_STW1" Datatype="Struct"><Member Name="MDI_MOD" Datatype="Bool" /><Member Name="PosModulo" Datatype="Bool" /><Member Name="NegModulo" Datatype="Bool" /><Member Name="reserved11" Datatype="Bool" /><Member Name="reserved12" Datatype="Bool" /><Member Name="reserved13" Datatype="Bool" /><Member Name="SetupMode" Datatype="Bool" /><Member Name="MDI_Activate" Datatype="Bool" /><Member Name="travBlockBit0" Datatype="Bool" /><Member Name="travBlockBit1" Datatype="Bool" /><Member Name="travBlockBit2" Datatype="Bool" /><Member Name="travBlockBit3" Datatype="Bool" /><Member Name="travBlockBit4" Datatype="Bool" /><Member Name="travBlockBit5" Datatype="Bool" /><Member Name="travBlockBit6" Datatype="Bool" /><Member Name="reserved7" Datatype="Bool" /></Member><Member Name="POS_STW2" Datatype="Struct"><Member Name="FlyingRef" Datatype="Bool" /><Member Name="reserved9" Datatype="Bool" /><Member Name="SelectProbe" Datatype="Bool" /><Member Name="ProbeEdgeEval" Datatype="Bool" /><Member Name="reserved12" Datatype="Bool" /><Member Name="reserved13" Datatype="Bool" /><Member Name="SW-Limit" Datatype="Bool" /><Member Name="HW-Limit" Datatype="Bool" /><Member Name="Trackingmode" Datatype="Bool" /><Member Name="SetReferencePoint" Datatype="Bool" /><Member Name="reserved2" Datatype="Bool" /><Member Name="reserved3" Datatype="Bool" /><Member Name="reserved4" Datatype="Bool" /><Member Name="jog_inc" Datatype="Bool" /><Member Name="reserved6" Datatype="Bool" /><Member Name="reserved7" Datatype="Bool" /></Member><Member Name="STW2" Datatype="Struct"><Member Name="TravelToFixStop" Datatype="Bool" /><Member Name="reserved9" Datatype="Bool" /><Member Name="reserved10" Datatype="Bool" /><Member Name="reserved11" Datatype="Bool" /><Member Name="signOfLifeBit0" Datatype="Bool" /><Member Name="signOfLifeBit1" Datatype="Bool" /><Member Name="signOfLifeBit2" Datatype="Bool" /><Member Name="signOfLifeBit3" Datatype="Bool" /><Member Name="reserved0" Datatype="Bool" /><Member Name="reserved1" Datatype="Bool" /><Member Name="reserved2" Datatype="Bool" /><Member Name="reserved3" Datatype="Bool" /><Member Name="reserved4" Datatype="Bool" /><Member Name="reserved5" Datatype="Bool" /><Member Name="reserved6" Datatype="Bool" /><Member Name="reserved7" Datatype="Bool" /></Member><Member Name="Override" Datatype="Word" /><Member Name="MDI_TARPOS" Datatype="DInt" /><Member Name="MDI_VELOCITY" Datatype="DInt" /><Member Name="MDI_ACC" Datatype="UInt" /><Member Name="MDI_DEC" Datatype="UInt" /><Member Name="reserved11" Datatype="Word" /></Member><Member Name="stat_CycRead" Datatype="Struct"><Member Name="ZSW1" Datatype="Struct"><Member Name="followingErrorInTolerance" Datatype="Bool" /><Member Name="controlRequest" Datatype="Bool" /><Member Name="targetPosReached" Datatype="Bool" /><Member Name="homePosSet" Datatype="Bool" /><Member Name="acknowledgeTraversingBlockActivated" Datatype="Bool" /><Member Name="driveStopped" Datatype="Bool" /><Member Name="axisAccelerates" Datatype="Bool" /><Member Name="axisDecelerates" Datatype="Bool" /><Member Name="readyForSwitchOn" Datatype="Bool" /><Member Name="ready" Datatype="Bool" /><Member Name="operationEnabled" Datatype="Bool" /><Member Name="faultPresent" Datatype="Bool" /><Member Name="noCoastingActive" Datatype="Bool" /><Member Name="noQuickStopActive" Datatype="Bool" /><Member Name="switchingOnInhibitedActive" Datatype="Bool" /><Member Name="warningActive" Datatype="Bool" /></Member><Member Name="POS_ZSW1" Datatype="Word" /><Member Name="POS_ZSW2" Datatype="Word" /><Member Name="ZSW2" Datatype="Struct"><Member Name="deviceSpecificBit8" Datatype="Bool" /><Member Name="deviceSpecificBit9" Datatype="Bool" /><Member Name="deviceSpecificBit10" Datatype="Bool" /><Member Name="deviceSpecificBit11" Datatype="Bool" /><Member Name="doSignOfLifeBit0" Datatype="Bool" /><Member Name="doSignOfLifeBit1" Datatype="Bool" /><Member Name="doSignOfLifeBit2" Datatype="Bool" /><Member Name="doSignOfLifeBit3" Datatype="Bool" /><Member Name="deviceSpecificBit0" Datatype="Bool" /><Member Name="deviceSpecificBit1" Datatype="Bool" /><Member Name="deviceSpecificBit2" Datatype="Bool" /><Member Name="deviceSpecificBit3" Datatype="Bool" /><Member Name="deviceSpecificBit4" Datatype="Bool" /><Member Name="deviceSpecificBit5" Datatype="Bool" /><Member Name="deviceSpecificBit6" Datatype="Bool" /><Member Name="deviceSpecificBit7" Datatype="Bool" /></Member><Member Name="MELDW" Datatype="Word" /><Member Name="XIST_A" Datatype="DInt" /><Member Name="NIST_B" Datatype="DInt" /><Member Name="Fault_Code" Datatype="Word" /><Member Name="Warn_Code" Datatype="Word" /><Member Name="Reserved" Datatype="Word" /></Member><Member Name="stat_ExecAux" Datatype="Bool" /><Member Name="stat_ExecR_Trig" Datatype="Bool" /><Member Name="stat_Jog1PAux" Datatype="Bool" /><Member Name="stat_Jog1PR_trig" Datatype="Bool" /><Member Name="stat_Jog2PAux" Datatype="Bool" /><Member Name="stat_Jog2PR_trig" Datatype="Bool" /><Member Name="stat_Jog1PMode8Aux" Datatype="Bool" /><Member Name="stat_Jog1PMode8R_trig" Datatype="Bool" /><Member Name="stat_Jog2PMode8Aux" Datatype="Bool" /><Member Name="stat_Jog2PMode8R_trig" Datatype="Bool" /><Member Name="stat_Status" Datatype="Word" /><Member Name="statStartCounter" Datatype="Int" /><Member Name="stat_ActMode" Datatype="Int" /><Member Name="stat_MaxCounterRetries" Datatype="Int" /></Section></Sections></Member>
+  </Section>
+</Sections></Interface>
+      <Name>FESTO_CMMT_ST_DB</Name>
+      <Number>12</Number>
+      <ProgrammingLanguage>DB</ProgrammingLanguage>
+    </AttributeList>
+    <ObjectList>
+      <MultilingualText ID="1" CompositionName="Comment">
+        <ObjectList>
+          <MultilingualTextItem ID="2" CompositionName="Items">
+            <AttributeList>
+              <Culture>de-DE</Culture>
+              <Text />
+            </AttributeList>
+          </MultilingualTextItem>
+        </ObjectList>
+      </MultilingualText>
+      <MultilingualText ID="3" CompositionName="Title">
+        <ObjectList>
+          <MultilingualTextItem ID="4" CompositionName="Items">
+            <AttributeList>
+              <Culture>de-DE</Culture>
+              <Text />
+            </AttributeList>
+          </MultilingualTextItem>
+        </ObjectList>
+      </MultilingualText>
+    </ObjectList>
+  </SW.Blocks.InstanceDB>
+</Document>
